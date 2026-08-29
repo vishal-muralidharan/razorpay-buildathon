@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from app import models, schemas, audit
 from app.database import get_db
 from app.scheduler import decide_retry, MAX_RETRIES
-from app.nudge import build_message, build_self_schedule_options, send_nudge
+from app.nudge import build_template_variables, build_self_schedule_options, send_nudge
 from app.razorpay_client import attempt_recurring_debit
 from app.scheduler_setup import scheduler
 from app.auth import verify_merchant
