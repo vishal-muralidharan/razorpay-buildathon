@@ -7,11 +7,11 @@ export const CATEGORY_LABEL = {
 };
 
 export const CATEGORY_COLOR = {
-  INSUFFICIENT_FUNDS: "#D9A441", // amber
-  BANK_OUTAGE: "#5B8FD9",        // steel blue
-  MANDATE_EXPIRED: "#B23B3B",    // clay
-  MANDATE_CANCELLED: "#8A6BAE",  // muted violet
-  UNKNOWN: "#7A8AA0",
+  INSUFFICIENT_FUNDS: "#F59E0B", // warning amber
+  BANK_OUTAGE: "#0D94FB",        // rzp blue
+  MANDATE_EXPIRED: "#EF4444",    // error red
+  MANDATE_CANCELLED: "#4B5563",  // dark gray
+  UNKNOWN: "#9CA3AF",
 };
 
 export const STATUS_LABEL = {
@@ -24,12 +24,12 @@ export const STATUS_LABEL = {
 };
 
 export const STATUS_STYLE = {
-  PENDING: "bg-ink-700 text-paper-100 border-ink-700/60",
-  SCHEDULED: "bg-amber-500/15 text-amber-400 border-amber-500/40",
-  AWAITING_CUSTOMER: "bg-[#5B8FD9]/15 text-[#8FB4EA] border-[#5B8FD9]/40",
-  RECOVERED: "bg-moss-500/15 text-moss-500 border-moss-500/40",
-  EXHAUSTED: "bg-clay-500/15 text-clay-500 border-clay-500/40",
-  CANCELLED: "bg-[#8A6BAE]/15 text-[#B79CD6] border-[#8A6BAE]/40",
+  PENDING: "bg-gray-100 text-gray-600 border-gray-200",
+  SCHEDULED: "bg-status-warning_bg text-status-warning border-status-warning/40",
+  AWAITING_CUSTOMER: "bg-rzp-lightblue text-rzp-blue border-rzp-blue/40",
+  RECOVERED: "bg-status-success_bg text-status-success border-status-success/40",
+  EXHAUSTED: "bg-status-error_bg text-status-error border-status-error/40",
+  CANCELLED: "bg-gray-200 text-gray-700 border-gray-300",
 };
 
 export function formatINR(amount) {

@@ -1,20 +1,20 @@
 import { CATEGORY_LABEL, CATEGORY_COLOR, formatDateTime } from "../utils";
 
 const OUTCOME_STYLE = {
-  PENDING: "text-paper-100/50",
-  SUCCESS: "text-moss-500",
-  FAILURE: "text-clay-500",
+  PENDING: "text-gray-500",
+  SUCCESS: "text-status-success",
+  FAILURE: "text-status-error",
 };
 
 export default function LiveFeed({ feed, onSelect }) {
   return (
-    <div className="border border-paper-100/10 rounded-lg bg-ink-800/60 p-5 h-full flex flex-col">
-      <div className="text-[11px] uppercase tracking-[0.14em] text-paper-100/50 font-body mb-3">
+    <div className="border border-rzp-border rounded-lg bg-white shadow-sm p-5 h-full flex flex-col">
+      <div className="text-[11px] uppercase tracking-[0.14em] text-gray-500 font-body mb-3">
         Live decision feed
       </div>
       <div className="flex-1 overflow-y-auto scrollbar-thin space-y-1 pr-1 max-h-[420px]">
         {feed.length === 0 && (
-          <div className="text-sm text-paper-100/40 font-body py-6 text-center">
+          <div className="text-sm text-gray-500 font-body py-6 text-center">
             No retry decisions yet — diagnose and schedule a transaction to see it here.
           </div>
         )}
@@ -22,7 +22,7 @@ export default function LiveFeed({ feed, onSelect }) {
           <button
             key={`${item.transaction_id}-${item.decided_at}-${i}`}
             onClick={() => onSelect(item.transaction_id)}
-            className="w-full text-left px-3 py-2.5 rounded-md hover:bg-paper-100/5 transition-colors border-b border-paper-100/5 last:border-0"
+            className="w-full text-left px-3 py-2.5 rounded-md hover:bg-rzp-gray transition-colors border-b border-rzp-border last:border-0"
           >
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-2 min-w-0">
@@ -30,10 +30,10 @@ export default function LiveFeed({ feed, onSelect }) {
                   className="w-1.5 h-1.5 rounded-full shrink-0"
                   style={{ background: CATEGORY_COLOR[item.decline_category] }}
                 />
-                <span className="font-body text-sm text-paper-50 truncate">
+                <span className="font-body text-sm text-rzp-navy font-medium truncate">
                   {item.customer_name}
                 </span>
-                <span className="font-mono text-[11px] text-paper-100/40 shrink-0">
+                <span className="font-mono text-[11px] text-gray-400 shrink-0">
                   #{item.transaction_id}
                 </span>
               </div>
@@ -42,10 +42,10 @@ export default function LiveFeed({ feed, onSelect }) {
               </span>
             </div>
             <div className="flex items-center justify-between mt-0.5 pl-3.5">
-              <span className="font-body text-xs text-paper-100/50">
+              <span className="font-body text-xs text-gray-500">
                 {CATEGORY_LABEL[item.decline_category]} → {formatDateTime(item.predicted_window)}
               </span>
-              <span className="font-mono text-[11px] text-paper-100/40">
+              <span className="font-mono text-[11px] text-gray-400">
                 {Math.round(item.predicted_success_prob * 100)}% conf.
               </span>
             </div>

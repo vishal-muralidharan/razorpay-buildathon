@@ -4,33 +4,27 @@ export default {
   theme: {
     extend: {
       colors: {
-        ink: {
-          950: "#081428",
-          900: "#0B1F3A",
-          800: "#122A4C",
-          700: "#1B3A63",
+        rzp: {
+          navy: "#012652",
+          blue: "#0D94FB",
+          lightblue: "#E6F3FF",
+          bg: "#F8F9FA",
+          gray: "#F4F8FB",
+          surface: "#FFFFFF",
+          border: "#E2E8F0"
         },
-        paper: {
-          50: "#FBF9F4",
-          100: "#F6F3EC",
-          200: "#EDE7D8",
-        },
-        moss: {
-          500: "#2E7D5B",
-          600: "#256349",
-        },
-        amber: {
-          400: "#D9A441",
-          500: "#C98A2C",
-        },
-        clay: {
-          500: "#B23B3B",
-          600: "#96302F",
-        },
+        status: {
+          success: "#10B981",
+          success_bg: "#D1FAE5",
+          error: "#EF4444",
+          error_bg: "#FEE2E2",
+          warning: "#F59E0B",
+          warning_bg: "#FEF3C7"
+        }
       },
       fontFamily: {
-        display: ["'Space Grotesk'", "sans-serif"],
-        body: ["'IBM Plex Sans'", "sans-serif"],
+        display: ["'Inter'", "sans-serif"],
+        body: ["'Inter'", "sans-serif"],
         mono: ["'IBM Plex Mono'", "monospace"],
       },
     },

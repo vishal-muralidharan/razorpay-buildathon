@@ -17,9 +17,9 @@ const STEP_LABEL = {
 
 function ActionButton({ onClick, children, tone = "default", disabled, busy }) {
   const tones = {
-    default: "border-paper-100/20 text-paper-50 hover:bg-paper-100/10",
-    primary: "border-amber-400/50 text-amber-400 hover:bg-amber-400/10",
-    danger: "border-clay-500/50 text-clay-500 hover:bg-clay-500/10",
+    default: "border-rzp-border text-rzp-navy hover:bg-rzp-gray",
+    primary: "border-rzp-blue bg-rzp-blue text-white hover:brightness-110",
+    danger: "border-status-error/50 text-status-error hover:bg-status-error/10",
   };
   return (
     <button
@@ -76,23 +76,23 @@ export default function AuditDrawer({ transactionId, onClose, onChanged }) {
   return (
     <div className="fixed inset-0 z-50 flex justify-end">
       <div className="absolute inset-0 bg-black/50" onClick={onClose} />
-      <div className="relative w-full max-w-2xl h-full bg-ink-900 border-l border-paper-100/10 overflow-y-auto scrollbar-thin">
-        <div className="sticky top-0 bg-ink-900/95 backdrop-blur border-b border-paper-100/10 px-6 py-4 flex items-center justify-between z-10">
+      <div className="relative w-full max-w-2xl h-full bg-white border-l border-rzp-border shadow-2xl overflow-y-auto scrollbar-thin">
+        <div className="sticky top-0 bg-white/95 backdrop-blur border-b border-rzp-border px-6 py-4 flex items-center justify-between z-10">
           <div>
-            <div className="text-[11px] uppercase tracking-[0.14em] text-paper-100/50 font-body">
+            <div className="text-[11px] uppercase tracking-[0.14em] text-gray-500 font-body">
               Transaction #{transactionId}
             </div>
-            <div className="font-display text-lg text-paper-50">
+            <div className="font-display text-lg text-rzp-navy font-bold">
               {detail?.customer?.name || "…"}
             </div>
           </div>
-          <button onClick={onClose} className="text-paper-100/50 hover:text-paper-50 font-mono text-sm">
+          <button onClick={onClose} className="text-gray-500 hover:text-rzp-navy font-mono text-sm">
             close ✕
           </button>
         </div>
 
         {error && (
-          <div className="mx-6 mt-4 px-4 py-2 rounded border border-clay-500/40 bg-clay-500/10 text-clay-500 text-sm font-mono">
+          <div className="mx-6 mt-4 px-4 py-2 rounded border border-status-error/40 bg-status-error/10 text-status-error text-sm font-mono">
             {error}
           </div>
         )}
@@ -101,29 +101,29 @@ export default function AuditDrawer({ transactionId, onClose, onChanged }) {
           <div className="p-6 space-y-6">
             {/* Summary */}
             <div className="grid grid-cols-2 gap-3 text-sm">
-              <div className="border border-paper-100/10 rounded-lg p-3">
-                <div className="text-[10px] uppercase tracking-wide text-paper-100/40 font-body">Amount</div>
-                <div className="font-mono text-paper-50 mt-0.5">{formatINR(detail.amount)}</div>
+              <div className="border border-rzp-border bg-rzp-gray rounded-lg p-3">
+                <div className="text-[10px] uppercase tracking-wide text-gray-500 font-body">Amount</div>
+                <div className="font-mono text-rzp-navy font-semibold mt-0.5">{formatINR(detail.amount)}</div>
               </div>
-              <div className="border border-paper-100/10 rounded-lg p-3">
-                <div className="text-[10px] uppercase tracking-wide text-paper-100/40 font-body">Status</div>
+              <div className="border border-rzp-border bg-rzp-gray rounded-lg p-3">
+                <div className="text-[10px] uppercase tracking-wide text-gray-500 font-body">Status</div>
                 <span className={`inline-block mt-0.5 px-2 py-0.5 rounded border text-[11px] font-mono ${STATUS_STYLE[detail.status]}`}>
                   {STATUS_LABEL[detail.status]}
                 </span>
               </div>
-              <div className="border border-paper-100/10 rounded-lg p-3">
-                <div className="text-[10px] uppercase tracking-wide text-paper-100/40 font-body">Decline code</div>
-                <div className="font-mono text-paper-50 mt-0.5">
+              <div className="border border-rzp-border bg-rzp-gray rounded-lg p-3">
+                <div className="text-[10px] uppercase tracking-wide text-gray-500 font-body">Decline code</div>
+                <div className="font-mono text-rzp-navy font-medium mt-0.5">
                   {detail.decline_code} · {CATEGORY_LABEL[detail.decline_category] || "Not yet diagnosed"}
                 </div>
               </div>
-              <div className="border border-paper-100/10 rounded-lg p-3">
-                <div className="text-[10px] uppercase tracking-wide text-paper-100/40 font-body">NPCI attempts used</div>
-                <div className="font-mono text-paper-50 mt-0.5">{detail.retry_count} / 3</div>
+              <div className="border border-rzp-border bg-rzp-gray rounded-lg p-3">
+                <div className="text-[10px] uppercase tracking-wide text-gray-500 font-body">NPCI attempts used</div>
+                <div className="font-mono text-rzp-navy font-medium mt-0.5">{detail.retry_count} / 3</div>
               </div>
-              <div className="border border-paper-100/10 rounded-lg p-3 col-span-2">
-                <div className="text-[10px] uppercase tracking-wide text-paper-100/40 font-body">Merchant / bank</div>
-                <div className="font-mono text-paper-50 mt-0.5">
+              <div className="border border-rzp-border bg-rzp-gray rounded-lg p-3 col-span-2">
+                <div className="text-[10px] uppercase tracking-wide text-gray-500 font-body">Merchant / bank</div>
+                <div className="font-mono text-rzp-navy font-medium mt-0.5">
                   {detail.mandate.merchant_name} · {detail.mandate.bank_name} · sub. age {detail.mandate.subscription_age_days}d
                 </div>
               </div>
@@ -131,7 +131,7 @@ export default function AuditDrawer({ transactionId, onClose, onChanged }) {
 
             {/* Demo actions */}
             <div>
-              <div className="text-[11px] uppercase tracking-[0.14em] text-paper-100/50 font-body mb-2">
+              <div className="text-[11px] uppercase tracking-[0.14em] text-gray-500 font-body mb-2">
                 Run the agent
               </div>
               <div className="flex flex-wrap gap-2">
@@ -163,7 +163,7 @@ export default function AuditDrawer({ transactionId, onClose, onChanged }) {
                   Try 4th retry (compliance test)
                 </ActionButton>
               </div>
-              <p className="text-xs text-paper-100/40 font-body mt-2">
+              <p className="text-xs text-gray-400 font-body mt-2">
                 Diagnose classifies the decline code, schedule routes it per the compliance
                 rules and sends the customer nudge, execute simulates the Razorpay debit
                 attempt. Every step writes a hash-chained audit row below.
@@ -173,17 +173,17 @@ export default function AuditDrawer({ transactionId, onClose, onChanged }) {
             {/* Nudges */}
             {detail.nudges?.length > 0 && (
               <div>
-                <div className="text-[11px] uppercase tracking-[0.14em] text-paper-100/50 font-body mb-2">
+                <div className="text-[11px] uppercase tracking-[0.14em] text-gray-500 font-body mb-2">
                   Customer nudges sent
                 </div>
                 <div className="space-y-2">
                   {detail.nudges.map((n, i) => (
-                    <div key={i} className="border border-paper-100/10 rounded-lg p-3 bg-ink-800/40">
-                      <div className="flex justify-between text-[11px] font-mono text-paper-100/40 mb-1">
+                    <div key={i} className="border border-rzp-border rounded-lg p-3 bg-rzp-gray">
+                      <div className="flex justify-between text-[11px] font-mono text-gray-400 mb-1">
                         <span>{n.channel} {n.simulated ? "(simulated)" : "(live)"}</span>
                         <span>{formatDateTime(n.sent_at)}</span>
                       </div>
-                      <div className="text-sm text-paper-100/80 font-body">{n.message}</div>
+                      <div className="text-sm text-gray-700 font-body">{n.message}</div>
                     </div>
                   ))}
                 </div>
@@ -193,46 +193,46 @@ export default function AuditDrawer({ transactionId, onClose, onChanged }) {
             {/* Hash-chained audit ledger - the signature element */}
             <div>
               <div className="flex items-center justify-between mb-2">
-                <div className="text-[11px] uppercase tracking-[0.14em] text-paper-100/50 font-body">
+                <div className="text-[11px] uppercase tracking-[0.14em] text-gray-500 font-body">
                   Audit ledger
                 </div>
                 {auditTrail && (
                   <span className={`text-[11px] font-mono px-2 py-0.5 rounded border ${
                     auditTrail.chain_valid
-                      ? "border-moss-500/40 text-moss-500"
-                      : "border-clay-500/40 text-clay-500"
+                      ? "border-status-success/40 text-status-success"
+                      : "border-status-error/40 text-status-error"
                   }`}>
                     {auditTrail.chain_valid ? "hash chain intact" : "chain tampered"}
                   </span>
                 )}
               </div>
-              <div className="border border-paper-100/10 rounded-lg bg-paper-50 text-ink-900 overflow-hidden">
+              <div className="border border-rzp-border rounded-lg bg-rzp-gray text-rzp-navy overflow-hidden">
                 {auditTrail?.entries?.length ? (
                   auditTrail.entries.map((entry, i) => (
                     <div key={entry.id} className="flex">
                       <div className="flex flex-col items-center w-8 pt-4">
-                        <div className="w-2.5 h-2.5 rounded-full bg-ink-900 shrink-0" />
+                        <div className="w-2.5 h-2.5 rounded-full bg-gray-400 shrink-0" />
                         {i < auditTrail.entries.length - 1 && (
-                          <div className="chain-link flex-1 bg-ink-900/20" style={{ background: "repeating-linear-gradient(to bottom, rgba(11,31,58,0.35) 0, rgba(11,31,58,0.35) 4px, transparent 4px, transparent 8px)" }} />
+                          <div className="chain-link flex-1 bg-transparent" />
                         )}
                       </div>
-                      <div className={`flex-1 py-3 pr-4 ${i < auditTrail.entries.length - 1 ? "border-b border-ink-900/10" : ""}`}>
+                      <div className={`flex-1 py-3 pr-4 ${i < auditTrail.entries.length - 1 ? "border-b border-rzp-border" : ""}`}>
                         <div className="flex items-center justify-between">
                           <span className="font-display text-sm font-medium">
                             {STEP_LABEL[entry.step_name] || entry.step_name}
                           </span>
-                          <span className="font-mono text-[11px] text-ink-900/50">
+                          <span className="font-mono text-[11px] text-gray-500">
                             {formatDateTime(entry.timestamp)}
                           </span>
                         </div>
-                        <div className="font-mono text-[11px] text-ink-900/60 mt-1 break-all">
+                        <div className="font-mono text-[11px] text-gray-500 mt-1 break-all">
                           hash {shortHash(entry.hash)} ← prev {shortHash(entry.prev_hash)}
                         </div>
                         <details className="mt-1.5">
-                          <summary className="text-[11px] font-mono text-ink-900/50 cursor-pointer hover:text-ink-900">
+                          <summary className="text-[11px] font-mono text-rzp-blue cursor-pointer hover:underline">
                             payload
                           </summary>
-                          <pre className="text-[11px] font-mono text-ink-900/70 mt-1 whitespace-pre-wrap break-all bg-ink-900/5 rounded p-2">
+                          <pre className="text-[11px] font-mono text-gray-600 mt-1 whitespace-pre-wrap break-all bg-white border border-rzp-border rounded p-2">
                             {JSON.stringify(JSON.parse(entry.payload_json), null, 2)}
                           </pre>
                         </details>
@@ -240,7 +240,7 @@ export default function AuditDrawer({ transactionId, onClose, onChanged }) {
                     </div>
                   ))
                 ) : (
-                  <div className="p-4 text-sm text-ink-900/50 font-body">
+                  <div className="p-4 text-sm text-gray-500 font-body">
                     No audit entries yet — run "Diagnose" above to start the ledger.
                   </div>
                 )}

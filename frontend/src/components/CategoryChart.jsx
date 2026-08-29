@@ -14,8 +14,8 @@ export default function CategoryChart({ summary }) {
   }));
 
   return (
-    <div className="border border-paper-100/10 rounded-lg bg-ink-800/60 p-5 h-full">
-      <div className="text-[11px] uppercase tracking-[0.14em] text-paper-100/50 font-body mb-3">
+    <div className="border border-rzp-border rounded-lg bg-white shadow-sm p-5 h-full">
+      <div className="text-[11px] uppercase tracking-[0.14em] text-gray-500 font-body mb-3">
         Amount at risk by root cause
       </div>
       <ResponsiveContainer width="100%" height={220}>
@@ -25,18 +25,19 @@ export default function CategoryChart({ summary }) {
             type="category"
             dataKey="label"
             width={130}
-            tick={{ fill: "#F6F3ECB3", fontSize: 12, fontFamily: "IBM Plex Sans" }}
+            tick={{ fill: "#4B5563", fontSize: 12, fontFamily: "Inter" }}
             axisLine={false}
             tickLine={false}
           />
           <Tooltip
-            cursor={{ fill: "rgba(246,243,236,0.05)" }}
+            cursor={{ fill: "rgba(1,38,82,0.05)" }}
             contentStyle={{
-              background: "#0B1F3A",
-              border: "1px solid rgba(246,243,236,0.15)",
+              background: "#FFFFFF",
+              border: "1px solid #E2E8F0",
               borderRadius: 8,
-              fontFamily: "IBM Plex Mono",
+              fontFamily: "Inter",
               fontSize: 12,
+              color: "#012652"
             }}
             formatter={(value, name, props) => [
               `${formatINR(value)} · ${props.payload.count} txns`,

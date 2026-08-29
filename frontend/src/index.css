@@ -3,15 +3,13 @@
 @tailwind utilities;
 
 body {
-  background-color: #0B1F3A;
-  background-image:
-    radial-gradient(circle at 15% 0%, rgba(46, 125, 91, 0.10), transparent 45%),
-    radial-gradient(circle at 85% 15%, rgba(201, 138, 44, 0.08), transparent 40%);
+  background-color: #F8F9FA;
   min-height: 100vh;
+  color: #012652;
 }
 
 ::selection {
-  background: rgba(217, 164, 65, 0.35);
+  background: rgba(13, 148, 251, 0.35);
 }
 
 /* Chain-link connector used between audit ledger rows */
@@ -19,8 +17,8 @@ body {
   width: 2px;
   background: repeating-linear-gradient(
     to bottom,
-    rgba(246, 243, 236, 0.35) 0,
-    rgba(246, 243, 236, 0.35) 4px,
+    rgba(1, 38, 82, 0.15) 0,
+    rgba(1, 38, 82, 0.15) 4px,
     transparent 4px,
     transparent 8px
   );
@@ -30,6 +28,6 @@ body {
   width: 6px;
 }
 .scrollbar-thin::-webkit-scrollbar-thumb {
-  background: rgba(246, 243, 236, 0.15);
+  background: rgba(1, 38, 82, 0.15);
   border-radius: 999px;
 }
