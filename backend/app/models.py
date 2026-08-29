@@ -35,6 +35,7 @@ class DeclineCategory(str, enum.Enum):
 class TransactionStatus(str, enum.Enum):
     PENDING = "PENDING"           # awaiting diagnosis/scheduling
     SCHEDULED = "SCHEDULED"       # retry slot chosen, waiting for it to arrive
+    PENDING_CONFIRMATION = "PENDING_CONFIRMATION" # API initiated, awaiting webhook
     AWAITING_CUSTOMER = "AWAITING_CUSTOMER"  # customer self-scheduling, auto-retry paused
     RECOVERED = "RECOVERED"       # retry succeeded, revenue recovered
     EXHAUSTED = "EXHAUSTED"       # 3 NPCI-permitted attempts used, still failing
@@ -65,6 +66,8 @@ class Mandate(Base):
     subscription_age_days = Column(Integer, default=0)
     merchant_name = Column(String, default="Vela SaaS")
     bank_name = Column(String, default="HDFC")
+    razorpay_customer_id = Column(String, nullable=True)
+    razorpay_token_id = Column(String, nullable=True)
 
     customer = relationship("Customer", back_populates="mandates")
     transactions = relationship("FailedTransaction", back_populates="mandate")

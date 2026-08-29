@@ -84,6 +84,8 @@ def run_seed(db):
             subscription_age_days=random.randint(30, 480),
             merchant_name=random.choice(MERCHANTS),
             bank_name=random.choice(BANKS),
+            razorpay_customer_id=f"cust_{i}_{random.randint(1000,9999)}",
+            razorpay_token_id=f"token_{i}_{random.randint(1000,9999)}"
         )
         db.add(mandate)
         db.flush()

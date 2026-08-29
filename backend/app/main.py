@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.database import Base, engine, SessionLocal
 from app import models  # noqa: F401 - ensures models are registered before create_all
-from app.routers import diagnose, predict, schedule, customer, audit_router, dashboard, transactions
+from app.routers import diagnose, predict, schedule, customer, audit_router, dashboard, transactions, webhook
 
 
 app = FastAPI(
@@ -28,6 +28,7 @@ app.include_router(customer.router)
 app.include_router(audit_router.router)
 app.include_router(dashboard.router)
 app.include_router(transactions.router)
+app.include_router(webhook.router)
 
 
 @app.get("/")

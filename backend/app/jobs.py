@@ -45,32 +45,34 @@ def execute_retry_job(decision_id: int):
                 return
         
         # 3. Proceed with execution
+        idempotency_key = f"txn_{txn.id}_attempt_{decision.attempt_number}"
+        
+        rzp_customer_id = txn.mandate.razorpay_customer_id or "cust_dummy"
+        rzp_token_id = txn.mandate.razorpay_token_id or "token_dummy"
+
         result = attempt_recurring_debit(
             amount=txn.amount,
             predicted_success_prob=decision.predicted_success_prob,
-            notes={"transaction_id": txn.id, "customer_id": txn.customer_id},
+            notes={
+                "transaction_id": txn.id, 
+                "customer_id": txn.customer_id,
+                "decision_id": decision.id
+            },
+            razorpay_customer_id=rzp_customer_id,
+            razorpay_token_id=rzp_token_id,
+            idempotency_key=idempotency_key,
         )
 
-        success = result.get("status") == "captured"
-        decision.outcome = "SUCCESS" if success else "FAILURE"
-        
-        if success:
-            txn.status = models.TransactionStatus.RECOVERED.value
-            txn.recovered_at = datetime.now(timezone.utc)
-        else:
-            txn.status = (
-                models.TransactionStatus.EXHAUSTED.value
-                if txn.retry_count >= MAX_RETRIES
-                else models.TransactionStatus.PENDING.value
-            )
-            
+        txn.status = models.TransactionStatus.PENDING_CONFIRMATION.value
         db.commit()
         
-        audit.log_step(db, txn.id, "RETRY_EXECUTED", {
+        audit.log_step(db, txn.id, "RETRY_INITIATED", {
             "attempt_number": decision.attempt_number,
-            "outcome": decision.outcome,
+            "idempotency_key": idempotency_key,
             "razorpay_result": result,
         })
+        
+        return result
     finally:
         db.close()
 
