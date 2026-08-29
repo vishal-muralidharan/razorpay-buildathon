@@ -96,6 +96,7 @@ class BankStatus(Base):
     bank_name = Column(String, unique=True, nullable=False)
     status = Column(String, default="UP")  # UP or DOWN
     updated_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+    normal_windows_count = Column(Integer, default=3)
 
 
 class FailedTransaction(Base):

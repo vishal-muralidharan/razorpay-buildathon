@@ -9,7 +9,7 @@ jobstores = {
 scheduler = BackgroundScheduler(jobstores=jobstores)
 
 def start_scheduler():
-    from app.jobs import reconciliation_sweep_job
+    from app.jobs import reconciliation_sweep_job, detect_bank_outages_job
     
     # Add reconciliation sweep to run every 15 minutes
     scheduler.add_job(
@@ -17,6 +17,15 @@ def start_scheduler():
         'interval',
         minutes=15,
         id='reconciliation_sweep',
+        replace_existing=True
+    )
+    
+    # Add bank outage detector to run every 5 minutes
+    scheduler.add_job(
+        detect_bank_outages_job,
+        'interval',
+        minutes=5,
+        id='detect_bank_outages',
         replace_existing=True
     )
     

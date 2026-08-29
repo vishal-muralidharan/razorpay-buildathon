@@ -110,3 +110,54 @@ def reconciliation_sweep_job():
                 })
     finally:
         db.close()
+
+
+def detect_bank_outages_job():
+    """Runs every 5 minutes to infer bank outages from recent decline spikes."""
+    db: Session = SessionLocal()
+    try:
+        now = datetime.now(timezone.utc)
+        five_mins_ago = now - timedelta(minutes=5)
+        
+        # Get all failed transactions in the last 5 minutes
+        recent_failures = (
+            db.query(models.FailedTransaction)
+            .filter(models.FailedTransaction.failed_at >= five_mins_ago)
+            .all()
+        )
+        
+        # Group by bank
+        from collections import defaultdict
+        bank_stats = defaultdict(lambda: {"total": 0, "outages": 0})
+        
+        for txn in recent_failures:
+            bank_name = txn.mandate.bank_name
+            bank_stats[bank_name]["total"] += 1
+            if txn.decline_category == "BANK_OUTAGE":
+                bank_stats[bank_name]["outages"] += 1
+                
+        # Update BankStatus for all banks
+        all_banks = db.query(models.BankStatus).all()
+        for bank in all_banks:
+            stats = bank_stats.get(bank.bank_name, {"total": 0, "outages": 0})
+            
+            # Outage condition: > 3 failures in 5 mins AND > 50% are BANK_OUTAGE
+            if stats["total"] >= 3 and (stats["outages"] / stats["total"]) > 0.5:
+                if bank.status != "DOWN":
+                    bank.status = "DOWN"
+                    bank.updated_at = now
+                    print(f"BankOutageDetector: {bank.bank_name} marked DOWN (outage spike detected)")
+                bank.normal_windows_count = 0
+            else:
+                # Normal window
+                bank.normal_windows_count += 1
+                if bank.normal_windows_count >= 3 and bank.status == "DOWN":
+                    bank.status = "UP"
+                    bank.updated_at = now
+                    print(f"BankOutageDetector: {bank.bank_name} marked UP (recovered after hysteresis)")
+        
+        db.commit()
+    except Exception as e:
+        print(f"Error in detect_bank_outages_job: {e}")
+    finally:
+        db.close()

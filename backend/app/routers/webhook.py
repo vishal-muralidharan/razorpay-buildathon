@@ -90,3 +90,36 @@ async def razorpay_webhook(request: Request, db: Session = Depends(get_db)):
         
     db.commit()
     return {"status": "ok"}
+
+
+@router.post("/webhook/bank-status")
+async def bank_status_webhook(request: Request, db: Session = Depends(get_db)):
+    """Receives asynchronous callbacks about bank health to pre-emptively pause retries."""
+    body = await request.body()
+    signature = request.headers.get("X-Razorpay-Signature", "")
+    
+    if RAZORPAY_WEBHOOK_SECRET and not verify_signature(body, signature, RAZORPAY_WEBHOOK_SECRET):
+        raise HTTPException(status_code=400, detail="Invalid signature")
+
+    try:
+        payload = json.loads(body)
+    except json.JSONDecodeError:
+        raise HTTPException(status_code=400, detail="Invalid JSON")
+
+    bank_name = payload.get("bank_name")
+    status = payload.get("status")
+    
+    if not bank_name or status not in ["UP", "DOWN"]:
+        return {"status": "ignored", "reason": "Invalid payload format"}
+        
+    bank = db.query(models.BankStatus).filter_by(bank_name=bank_name).first()
+    if not bank:
+        return {"status": "not_found", "reason": f"Bank {bank_name} not found"}
+        
+    bank.status = status
+    bank.normal_windows_count = 0 if status == "DOWN" else 3
+    bank.updated_at = datetime.now(timezone.utc)
+    db.commit()
+    
+    print(f"Webhook BankOutageDetector: {bank_name} marked {status}")
+    return {"status": "ok"}
