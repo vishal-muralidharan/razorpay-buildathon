@@ -1,0 +1,54 @@
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+
+from app.database import Base, engine, SessionLocal
+from app import models  # noqa: F401 - ensures models are registered before create_all
+from app.routers import diagnose, predict, schedule, customer, audit_router, dashboard, transactions
+
+Base.metadata.create_all(bind=engine)
+
+app = FastAPI(
+    title="Mandate Resurrection Agent",
+    description="Diagnoses failed UPI Autopay/e-NACH mandates, predicts the best retry "
+                "window, and recovers revenue within NPCI's 3-retry compliance cap.",
+    version="1.0.0",
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+app.include_router(diagnose.router)
+app.include_router(predict.router)
+app.include_router(schedule.router)
+app.include_router(customer.router)
+app.include_router(audit_router.router)
+app.include_router(dashboard.router)
+app.include_router(transactions.router)
+
+
+@app.get("/")
+def root():
+    return {
+        "service": "Mandate Resurrection Agent",
+        "status": "up",
+        "docs": "/docs",
+    }
+
+
+@app.on_event("startup")
+def auto_seed_if_empty():
+    """Convenience for the demo: seed synthetic data automatically on first
+    boot if the database is empty, so `uvicorn app.main:app` alone is
+    enough to get a working demo. Safe to remove for a real deployment."""
+    db = SessionLocal()
+    try:
+        if db.query(models.Customer).count() == 0:
+            from app.seed import run_seed
+            run_seed(db)
+    finally:
+        db.close()

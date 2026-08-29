@@ -1,0 +1,35 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  background-color: #0B1F3A;
+  background-image:
+    radial-gradient(circle at 15% 0%, rgba(46, 125, 91, 0.10), transparent 45%),
+    radial-gradient(circle at 85% 15%, rgba(201, 138, 44, 0.08), transparent 40%);
+  min-height: 100vh;
+}
+
+::selection {
+  background: rgba(217, 164, 65, 0.35);
+}
+
+/* Chain-link connector used between audit ledger rows */
+.chain-link {
+  width: 2px;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(246, 243, 236, 0.35) 0,
+    rgba(246, 243, 236, 0.35) 4px,
+    transparent 4px,
+    transparent 8px
+  );
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+  width: 6px;
+}
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: rgba(246, 243, 236, 0.15);
+  border-radius: 999px;
+}
