@@ -13,7 +13,7 @@ Run standalone with `python -m app.seed` (uses its own DB session), or
 imported and called with an existing session (as main.py does on startup).
 """
 import random
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 from app import models
 from app.decline_parser import parse_decline_code
@@ -53,7 +53,7 @@ def _random_phone():
 
 
 def run_seed(db):
-    now = datetime.utcnow()
+    now = datetime.now(timezone.utc)
 
     # --- Bank status (mock uptime tracker) -----------------------------
     for i, bank in enumerate(BANKS):

@@ -14,10 +14,10 @@ Supporting tables added to make those four actually work end to end:
   - NudgeLog              (WhatsApp/SMS messages sent, and the customer's self-scheduled date)
 """
 import enum
-from datetime import datetime
+from datetime import datetime, timezone
 
 from sqlalchemy import (
-    Column, Integer, String, Float, DateTime, ForeignKey, Text, Boolean, Enum
+    Column, Integer, String, Float, DateTime, ForeignKey, Text, Boolean, Enum, JSON
 )
 from sqlalchemy.orm import relationship
 
@@ -60,7 +60,7 @@ class Mandate(Base):
     customer_id = Column(Integer, ForeignKey("customers.id"), nullable=False)
     amount = Column(Float, nullable=False)
     frequency = Column(String, default="MONTHLY")  # MONTHLY, QUARTERLY, etc.
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
     status = Column(String, default="ACTIVE")  # ACTIVE, EXPIRED, CANCELLED
     subscription_age_days = Column(Integer, default=0)
     merchant_name = Column(String, default="Vela SaaS")
@@ -77,7 +77,7 @@ class DebitHistory(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     customer_id = Column(Integer, ForeignKey("customers.id"), nullable=False)
-    debit_date = Column(DateTime, nullable=False)
+    debit_date = Column(DateTime(timezone=True), nullable=False)
     day_of_month = Column(Integer, nullable=False)
     amount = Column(Float, nullable=False)
 
@@ -92,7 +92,7 @@ class BankStatus(Base):
     id = Column(Integer, primary_key=True, index=True)
     bank_name = Column(String, unique=True, nullable=False)
     status = Column(String, default="UP")  # UP or DOWN
-    updated_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
 
 
 class FailedTransaction(Base):
@@ -104,11 +104,11 @@ class FailedTransaction(Base):
     amount = Column(Float, nullable=False)
     decline_code = Column(String, nullable=False)
     decline_category = Column(String, default=DeclineCategory.UNKNOWN.value)
-    failed_at = Column(DateTime, default=datetime.utcnow)
+    failed_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
     retry_count = Column(Integer, default=0)  # attempts consumed of the NPCI cap of 3
     status = Column(String, default=TransactionStatus.PENDING.value)
-    customer_chosen_date = Column(DateTime, nullable=True)
-    recovered_at = Column(DateTime, nullable=True)
+    customer_chosen_date = Column(DateTime(timezone=True), nullable=True)
+    recovered_at = Column(DateTime(timezone=True), nullable=True)
 
     mandate = relationship("Mandate", back_populates="transactions")
     decisions = relationship("RetryDecision", back_populates="transaction")
@@ -122,10 +122,10 @@ class RetryDecision(Base):
     id = Column(Integer, primary_key=True, index=True)
     transaction_id = Column(Integer, ForeignKey("failed_transactions.id"), nullable=False)
     attempt_number = Column(Integer, nullable=False)  # 1, 2, or 3
-    chosen_slot_time = Column(DateTime, nullable=False)
+    chosen_slot_time = Column(DateTime(timezone=True), nullable=False)
     predicted_success_prob = Column(Float, nullable=False)
     reason = Column(Text, nullable=False)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
     outcome = Column(String, default="PENDING")  # PENDING, SUCCESS, FAILURE
 
     transaction = relationship("FailedTransaction", back_populates="decisions")
@@ -139,7 +139,7 @@ class NudgeLog(Base):
     channel = Column(String, default="whatsapp")  # whatsapp or sms
     message = Column(Text, nullable=False)
     self_schedule_options = Column(Text, nullable=True)  # JSON list of 3 candidate dates
-    sent_at = Column(DateTime, default=datetime.utcnow)
+    sent_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
     simulated = Column(Boolean, default=True)
 
     transaction = relationship("FailedTransaction", back_populates="nudges")
@@ -154,9 +154,9 @@ class AuditLog(Base):
     id = Column(Integer, primary_key=True, index=True)
     transaction_id = Column(Integer, ForeignKey("failed_transactions.id"), nullable=False)
     step_name = Column(String, nullable=False)
-    payload_json = Column(Text, nullable=False)
+    payload_json = Column(JSON, nullable=False)
     prev_hash = Column(String, nullable=False)
     hash = Column(String, nullable=False)
-    timestamp = Column(DateTime, default=datetime.utcnow)
+    timestamp = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
 
     transaction = relationship("FailedTransaction", back_populates="audit_logs")

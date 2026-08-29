@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
@@ -33,7 +33,7 @@ def schedule_retry(req: schemas.ScheduleRetryRequest, db: Session = Depends(get_
 
     # If the customer already self-scheduled a future date, auto-retry stays paused.
     if txn.status == models.TransactionStatus.AWAITING_CUSTOMER.value and txn.customer_chosen_date:
-        if datetime.utcnow() < txn.customer_chosen_date:
+        if datetime.now(timezone.utc) < txn.customer_chosen_date:
             audit.log_step(db, txn.id, "SCHEDULING_PAUSED", {
                 "reason": "Customer self-scheduled a date; automated retry stays paused until then.",
                 "customer_chosen_date": txn.customer_chosen_date,

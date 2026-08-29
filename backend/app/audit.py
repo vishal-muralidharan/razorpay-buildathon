@@ -12,7 +12,7 @@ chain.
 """
 import hashlib
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 
 from sqlalchemy.orm import Session
 
@@ -28,6 +28,9 @@ def _compute_hash(prev_hash: str, step_name: str, payload_json: str, timestamp: 
 
 def log_step(db: Session, transaction_id: int, step_name: str, payload: dict) -> models.AuditLog:
     """Appends a new hash-chained audit row for this transaction and commits it."""
+    # Serialize concurrent appends by locking the parent transaction
+    db.query(models.FailedTransaction).filter_by(id=transaction_id).with_for_update().first()
+
     last_entry = (
         db.query(models.AuditLog)
         .filter(models.AuditLog.transaction_id == transaction_id)
@@ -35,7 +38,7 @@ def log_step(db: Session, transaction_id: int, step_name: str, payload: dict) ->
         .first()
     )
     prev_hash = last_entry.hash if last_entry else GENESIS_HASH
-    timestamp = datetime.utcnow()
+    timestamp = datetime.now(timezone.utc)
     payload_json = json.dumps(payload, default=str, sort_keys=True)
     entry_hash = _compute_hash(prev_hash, step_name, payload_json, timestamp)
 

@@ -25,7 +25,7 @@ COMPLIANCE RULES IMPLEMENTED (mapped to NPCI's retry-limit requirements):
      automatic retries pause until that date - handled in the API layer,
      not here.
 """
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 from sqlalchemy.orm import Session
 
@@ -98,7 +98,7 @@ def decide_retry(db: Session, txn: models.FailedTransaction):
             .filter(models.BankStatus.bank_name == txn.mandate.bank_name)
             .first()
         )
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
         if bank_status and bank_status.status == "UP":
             slot = _push_out_of_peak_hours(now + timedelta(minutes=30))
             return {

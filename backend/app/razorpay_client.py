@@ -15,7 +15,7 @@ import os
 import random
 import string
 import base64
-from datetime import datetime
+from datetime import datetime, timezone
 
 import requests
 
@@ -35,7 +35,7 @@ def _simulated_attempt(amount: float, predicted_success_prob: float) -> dict:
         "status": "captured" if success else "failed",
         "simulated": True,
         "amount_paise": int(amount * 100),
-        "captured_at": datetime.utcnow().isoformat(),
+        "captured_at": datetime.now(timezone.utc).isoformat(),
     }
 
 

@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from sqlalchemy.orm import Session
 from app.database import SessionLocal
 from app import models, audit
@@ -21,7 +21,7 @@ def execute_retry_job(decision_id: int):
             bank_status = db.query(models.BankStatus).filter(models.BankStatus.bank_name == txn.mandate.bank_name).first()
             if not bank_status or bank_status.status == "DOWN":
                 # Still down, reschedule
-                now = datetime.utcnow()
+                now = datetime.now(timezone.utc)
                 new_slot = _push_out_of_peak_hours(now + timedelta(hours=BANK_OUTAGE_RECHECK_HOURS))
                 decision.chosen_slot_time = new_slot
                 decision.reason = f"BANK_OUTAGE at {txn.mandate.bank_name} still ongoing (status=DOWN) - rescheduled by {BANK_OUTAGE_RECHECK_HOURS}h."
@@ -56,7 +56,7 @@ def execute_retry_job(decision_id: int):
         
         if success:
             txn.status = models.TransactionStatus.RECOVERED.value
-            txn.recovered_at = datetime.utcnow()
+            txn.recovered_at = datetime.now(timezone.utc)
         else:
             txn.status = (
                 models.TransactionStatus.EXHAUSTED.value
@@ -78,7 +78,7 @@ def execute_retry_job(decision_id: int):
 def reconciliation_sweep_job():
     db: Session = SessionLocal()
     try:
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
         # Find PENDING decisions whose chosen slot is in the past
         stale_decisions = (
             db.query(models.RetryDecision)

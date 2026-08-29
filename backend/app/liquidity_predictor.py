@@ -33,7 +33,7 @@ salary-cycle features) behind the same function signature without touching
 any caller.
 """
 from collections import Counter
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import calendar
 
 from sqlalchemy.orm import Session
@@ -63,7 +63,7 @@ def _next_occurrence_of_day(day_of_month: int, after: datetime) -> datetime:
 
 def predict_liquidity_window(db: Session, customer_id: int, after: datetime = None):
     """Returns (recommended_date, confidence_score, method, sample_size)."""
-    after = after or datetime.utcnow()
+    after = after or datetime.now(timezone.utc)
 
     personal_history = (
         db.query(models.DebitHistory)
