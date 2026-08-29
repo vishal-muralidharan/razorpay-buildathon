@@ -41,10 +41,13 @@ def root():
 
 
 @app.on_event("startup")
-def auto_seed_if_empty():
+def startup_event():
     """Convenience for the demo: seed synthetic data automatically on first
     boot if the database is empty, so `uvicorn app.main:app` alone is
     enough to get a working demo. Safe to remove for a real deployment."""
+    from app.scheduler_setup import start_scheduler
+    start_scheduler()
+
     db = SessionLocal()
     try:
         if db.query(models.Customer).count() == 0:
@@ -52,3 +55,8 @@ def auto_seed_if_empty():
             run_seed(db)
     finally:
         db.close()
+
+@app.on_event("shutdown")
+def shutdown_event():
+    from app.scheduler_setup import scheduler
+    scheduler.shutdown()

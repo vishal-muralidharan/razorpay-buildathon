@@ -8,6 +8,8 @@ from app.database import get_db
 from app.scheduler import decide_retry, MAX_RETRIES
 from app.nudge import build_message, build_self_schedule_options, send_nudge
 from app.razorpay_client import attempt_recurring_debit
+from app.scheduler_setup import scheduler
+from app.jobs import execute_retry_job
 
 router = APIRouter(tags=["scheduling"])
 
@@ -65,14 +67,26 @@ def schedule_retry(req: schemas.ScheduleRetryRequest, db: Session = Depends(get_
     # Consume one NPCI-permitted attempt slot for this scheduling decision.
     txn.retry_count += 1
     txn.status = decision["new_status"]
-    db.add(models.RetryDecision(
+    new_decision = models.RetryDecision(
         transaction_id=txn.id,
         attempt_number=txn.retry_count,
         chosen_slot_time=decision["scheduled_time"],
         predicted_success_prob=decision["predicted_success_prob"],
         reason=decision["reason"],
-    ))
+    )
+    db.add(new_decision)
     db.commit()
+
+    # Add job to APScheduler
+    scheduler.add_job(
+        execute_retry_job, 
+        'date', 
+        run_date=new_decision.chosen_slot_time, 
+        args=[new_decision.id], 
+        id=f"retry-{new_decision.id}", 
+        misfire_grace_time=3600,
+        replace_existing=True
+    )
 
     audit.log_step(db, txn.id, "RETRY_SCHEDULED", {
         "attempt_number": txn.retry_count,
@@ -139,35 +153,15 @@ def execute_retry(req: schemas.ExecuteRetryRequest, db: Session = Depends(get_db
     if not decision or decision.outcome != "PENDING":
         raise HTTPException(status_code=400, detail="No pending scheduled retry to execute for this transaction.")
 
-    result = attempt_recurring_debit(
-        amount=txn.amount,
-        predicted_success_prob=decision.predicted_success_prob,
-        notes={"transaction_id": txn.id, "customer_id": txn.customer_id},
-    )
-
-    success = result.get("status") == "captured"
-    decision.outcome = "SUCCESS" if success else "FAILURE"
-    if success:
-        txn.status = models.TransactionStatus.RECOVERED.value
-        txn.recovered_at = datetime.utcnow()
-    else:
-        txn.status = (
-            models.TransactionStatus.EXHAUSTED.value
-            if txn.retry_count >= MAX_RETRIES
-            else models.TransactionStatus.PENDING.value
-        )
-    db.commit()
-
-    audit.log_step(db, txn.id, "RETRY_EXECUTED", {
-        "attempt_number": decision.attempt_number,
-        "outcome": decision.outcome,
-        "razorpay_result": result,
-    })
+    result = execute_retry_job(decision.id)
+    
+    db.refresh(txn)
+    db.refresh(decision)
 
     return schemas.ExecuteRetryResponse(
         transaction_id=txn.id,
         outcome=decision.outcome,
-        razorpay_payment_id=result.get("razorpay_payment_id"),
+        razorpay_payment_id=result.get("razorpay_payment_id") if result else None,
         status=txn.status,
         attempts_used=txn.retry_count,
     )
