@@ -88,12 +88,16 @@ def schedule_retry(req: schemas.ScheduleRetryRequest, db: Session = Depends(get_
         replace_existing=True
     )
 
-    audit.log_step(db, txn.id, "RETRY_SCHEDULED", {
+    audit_payload = {
         "attempt_number": txn.retry_count,
         "scheduled_time": decision["scheduled_time"],
         "predicted_success_prob": decision["predicted_success_prob"],
         "reason": decision["reason"],
-    })
+    }
+    if decision.get("shap_values"):
+        audit_payload["shap_values"] = decision["shap_values"]
+
+    audit.log_step(db, txn.id, "RETRY_SCHEDULED", audit_payload)
 
     # Fire the customer nudge for this decision.
     customer = db.query(models.Customer).get(txn.customer_id)

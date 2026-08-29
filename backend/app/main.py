@@ -46,7 +46,10 @@ def startup_event():
     boot if the database is empty, so `uvicorn app.main:app` alone is
     enough to get a working demo. Safe to remove for a real deployment."""
     from app.scheduler_setup import start_scheduler
+    from app.liquidity_predictor import train_mock_model
+    
     start_scheduler()
+    train_mock_model()
 
     db = SessionLocal()
     try:

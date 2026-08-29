@@ -76,14 +76,15 @@ def decide_retry(db: Session, txn: models.FailedTransaction):
         }
 
     if category == "INSUFFICIENT_FUNDS":
-        recommended_date, confidence, method, sample_size = predict_liquidity_window(
-            db, txn.customer_id
+        recommended_date, confidence, method, sample_size, shap_values = predict_liquidity_window(
+            db, txn
         )
         slot = _push_out_of_peak_hours(recommended_date)
         return {
             "allowed": True,
             "scheduled_time": slot,
             "predicted_success_prob": confidence,
+            "shap_values": shap_values,
             "reason": (
                 f"INSUFFICIENT_FUNDS - routed to predicted liquidity window instead of an "
                 f"immediate retry. Model: {method} (n={sample_size}), predicted high-balance "
@@ -126,14 +127,15 @@ def decide_retry(db: Session, txn: models.FailedTransaction):
             }
 
     # UNKNOWN category - fall back to the liquidity predictor as a safe default
-    recommended_date, confidence, method, sample_size = predict_liquidity_window(
-        db, txn.customer_id
+    recommended_date, confidence, method, sample_size, shap_values = predict_liquidity_window(
+        db, txn
     )
     slot = _push_out_of_peak_hours(recommended_date)
     return {
         "allowed": True,
         "scheduled_time": slot,
         "predicted_success_prob": max(confidence - 0.15, 0.1),
+        "shap_values": shap_values,
         "reason": (
             "Decline category could not be classified with confidence - defaulting to the "
             "liquidity-window predictor as the safest general strategy."
