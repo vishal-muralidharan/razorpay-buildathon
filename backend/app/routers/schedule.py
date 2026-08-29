@@ -9,16 +9,19 @@ from app.scheduler import decide_retry, MAX_RETRIES
 from app.nudge import build_message, build_self_schedule_options, send_nudge
 from app.razorpay_client import attempt_recurring_debit
 from app.scheduler_setup import scheduler
+from app.auth import verify_merchant
 from app.jobs import execute_retry_job
 
 router = APIRouter(tags=["scheduling"])
 
 
 @router.post("/schedule-retry", response_model=schemas.ScheduleRetryResponse)
-def schedule_retry(req: schemas.ScheduleRetryRequest, db: Session = Depends(get_db)):
+def schedule_retry(req: schemas.ScheduleRetryRequest, merchant_name: str = Depends(verify_merchant), db: Session = Depends(get_db)):
     txn = db.query(models.FailedTransaction).get(req.transaction_id)
     if not txn:
         raise HTTPException(status_code=404, detail="Transaction not found")
+    if txn.mandate.merchant_name != merchant_name:
+        raise HTTPException(status_code=403, detail="Unauthorized for this transaction")
 
     # Hard compliance gate - reject a 4th attempt outright.
     if txn.retry_count >= MAX_RETRIES:
@@ -102,7 +105,9 @@ def schedule_retry(req: schemas.ScheduleRetryRequest, db: Session = Depends(get_
     # Fire the customer nudge for this decision.
     customer = db.query(models.Customer).get(txn.customer_id)
     mandate = txn.mandate
-    message = build_message(
+    from app.nudge import build_template_variables, build_self_schedule_options, send_nudge
+
+    template_vars = build_template_variables(
         category=txn.decline_category,
         customer_name=customer.name,
         merchant=mandate.merchant_name,
@@ -111,20 +116,20 @@ def schedule_retry(req: schemas.ScheduleRetryRequest, db: Session = Depends(get_
         recommended_date=decision["scheduled_time"],
     )
     options = build_self_schedule_options(decision["scheduled_time"])
-    send_result = send_nudge(customer.phone, message, channel="whatsapp")
+    send_result = send_nudge(customer.phone, txn.decline_category, template_vars, channel="whatsapp")
 
     import json
     db.add(models.NudgeLog(
         transaction_id=txn.id,
         channel="whatsapp",
-        message=message,
+        message=json.dumps(template_vars),
         self_schedule_options=json.dumps(options),
         simulated=send_result.get("simulated", True),
     ))
     db.commit()
 
     audit.log_step(db, txn.id, "NUDGE_SENT", {
-        "channel": "whatsapp", "message": message, "self_schedule_options": options,
+        "channel": "whatsapp", "template_vars": template_vars, "self_schedule_options": options,
         "send_result": send_result,
     })
 
@@ -139,7 +144,7 @@ def schedule_retry(req: schemas.ScheduleRetryRequest, db: Session = Depends(get_
 
 
 @router.post("/execute-retry", response_model=schemas.ExecuteRetryResponse)
-def execute_retry(req: schemas.ExecuteRetryRequest, db: Session = Depends(get_db)):
+def execute_retry(req: schemas.ExecuteRetryRequest, merchant_name: str = Depends(verify_merchant), db: Session = Depends(get_db)):
     """Executes the most recent scheduled retry decision against Razorpay
     test-mode (or the simulator). In production this would be invoked by
     APScheduler when a decision's chosen_slot_time arrives; exposed here as
@@ -147,6 +152,8 @@ def execute_retry(req: schemas.ExecuteRetryRequest, db: Session = Depends(get_db
     txn = db.query(models.FailedTransaction).get(req.transaction_id)
     if not txn:
         raise HTTPException(status_code=404, detail="Transaction not found")
+    if txn.mandate.merchant_name != merchant_name:
+        raise HTTPException(status_code=403, detail="Unauthorized for this transaction")
 
     decision = (
         db.query(models.RetryDecision)

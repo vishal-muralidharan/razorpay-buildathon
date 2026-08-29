@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 
 from app import models, schemas
 from app.database import get_db
+from app.auth import verify_merchant
 
 router = APIRouter(tags=["transactions"])
 
@@ -14,9 +15,10 @@ def list_transactions(
     status: Optional[str] = None,
     category: Optional[str] = None,
     limit: int = Query(default=100, le=500),
+    merchant_name: str = Depends(verify_merchant),
     db: Session = Depends(get_db),
 ):
-    q = db.query(models.FailedTransaction)
+    q = db.query(models.FailedTransaction).join(models.Mandate).filter(models.Mandate.merchant_name == merchant_name)
     if status:
         q = q.filter(models.FailedTransaction.status == status)
     if category:
@@ -39,10 +41,12 @@ def list_transactions(
 
 
 @router.get("/transactions/{transaction_id}")
-def get_transaction_detail(transaction_id: int, db: Session = Depends(get_db)):
+def get_transaction_detail(transaction_id: int, merchant_name: str = Depends(verify_merchant), db: Session = Depends(get_db)):
     t = db.query(models.FailedTransaction).get(transaction_id)
     if not t:
         raise HTTPException(status_code=404, detail="Transaction not found")
+    if t.mandate.merchant_name != merchant_name:
+        raise HTTPException(status_code=403, detail="Unauthorized for this transaction")
 
     return {
         "id": t.id,

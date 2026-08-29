@@ -12,6 +12,7 @@ Seeds a synthetic but realistic dataset:
 Run standalone with `python -m app.seed` (uses its own DB session), or
 imported and called with an existing session (as main.py does on startup).
 """
+import os
 import random
 from datetime import datetime, timedelta, timezone
 
@@ -53,6 +54,7 @@ def _random_phone():
 
 
 def run_seed(db):
+    assert os.getenv("ENABLE_AUTO_SEED") == "true", "ENABLE_AUTO_SEED must be explicitly set to 'true' to run the seed script."
     now = datetime.now(timezone.utc)
 
     # --- Bank status (mock uptime tracker) -----------------------------

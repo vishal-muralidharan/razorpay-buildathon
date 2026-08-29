@@ -51,13 +51,8 @@ def startup_event():
     start_scheduler()
     train_mock_model()
 
-    db = SessionLocal()
-    try:
-        if db.query(models.Customer).count() == 0:
-            from app.seed import run_seed
-            run_seed(db)
-    finally:
-        db.close()
+    # Removed auto-seeding. Run scripts/seed_demo.py manually with ENABLE_AUTO_SEED=true
+    pass
 
 @app.on_event("shutdown")
 def shutdown_event():

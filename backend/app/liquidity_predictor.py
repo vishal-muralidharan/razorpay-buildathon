@@ -161,5 +161,8 @@ def predict_liquidity_window(db: Session, txn: models.FailedTransaction, after: 
         recommended_date = _next_occurrence_of_day(best_day, after)
         return recommended_date, confidence, "cohort_fallback", len(all_history), None
 
-    # 4. Fallback: No data anywhere
-    return after + timedelta(days=3), 0.25, "default_no_data", 0, None
+    # 4. Fallback: No data anywhere, use merchant policy or defaults
+    policy = db.query(models.MerchantRetryPolicy).filter_by(merchant_name=txn.mandate.merchant_name).first()
+    fallback_days = policy.fallback_days if policy else 3
+    fallback_conf = policy.fallback_confidence if policy else 0.25
+    return after + timedelta(days=fallback_days), fallback_conf, "default_no_data", 0, None

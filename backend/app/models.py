@@ -99,6 +99,16 @@ class BankStatus(Base):
     normal_windows_count = Column(Integer, default=3)
 
 
+class MerchantRetryPolicy(Base):
+    """Configurable fallback values for liquidity prediction per merchant."""
+    __tablename__ = "merchant_retry_policy"
+
+    id = Column(Integer, primary_key=True, index=True)
+    merchant_name = Column(String, unique=True, nullable=False)
+    fallback_days = Column(Integer, default=3)
+    fallback_confidence = Column(Float, default=0.25)
+
+
 class FailedTransaction(Base):
     __tablename__ = "failed_transactions"
 
