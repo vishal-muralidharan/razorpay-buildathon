@@ -13,18 +13,12 @@ The following critical gaps identified in the v1 Audit have been successfully re
 - **Testing**: Added a `pytest` suite ensuring the `decide_retry` engine obeys the 3-attempt NPCI compliance limits, peak hours, and hard decline filters.
 - **Seeding Guardrails**: Removed DB seeding from `main.py` startup hooks and gated it behind an explicit `ENABLE_AUTO_SEED` environment variable in a standalone script.
 - **Razorpay Sync**: Upgraded to token-based recurring debits and established a signed webhook listener.
+- **Frontend Authentication**: Updated the frontend (`api.js`) to pass the required `Authorization: Bearer <token>` header, fixing the broken dashboard UI.
+- **Dashboard Endpoint Data Leak**: Scoped the `/dashboard/summary` and `/dashboard/live-feed` queries tightly to the authenticated `merchant_name`, successfully sealing the multi-tenant data leak.
 
 ---
 
-## 🔴 2. Critical Inconsistencies (Action Required)
 
-### A. Frontend Authentication Broken
-While we successfully secured the backend endpoints (`/diagnose`, `/schedule-retry`, `/execute-retry`, `/transactions`) with `verify_merchant`, **the frontend (`api.js`) was not updated to pass the required `Authorization: Bearer <token>` header**.
-- **Impact**: The UI dashboard is currently broken and will encounter `401 Unauthorized` or `403 Forbidden` responses when interacting with the secured backend.
-
-### B. Dashboard Endpoint Data Leak
-The `/dashboard/summary` and `/dashboard/live-feed` endpoints in `backend/app/routers/dashboard.py` do **not** use the `verify_merchant` dependency.
-- **Impact**: Any merchant viewing the dashboard is currently pulling an aggregated view of `models.FailedTransaction.all()`. This is a severe multi-tenant data leak. The queries need to be strictly scoped to `txn.mandate.merchant_name == merchant_name`.
 
 ---
 

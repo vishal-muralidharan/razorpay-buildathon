@@ -3,13 +3,14 @@ from sqlalchemy.orm import Session
 
 from app import models, schemas
 from app.database import get_db
+from app.auth import verify_merchant
 
 router = APIRouter(prefix="/dashboard", tags=["dashboard"])
 
 
 @router.get("/summary", response_model=schemas.DashboardSummary)
-def dashboard_summary(db: Session = Depends(get_db)):
-    txns = db.query(models.FailedTransaction).all()
+def dashboard_summary(merchant_name: str = Depends(verify_merchant), db: Session = Depends(get_db)):
+    txns = db.query(models.FailedTransaction).join(models.Mandate).filter(models.Mandate.merchant_name == merchant_name).all()
 
     total_at_risk = sum(t.amount for t in txns if t.status != models.TransactionStatus.RECOVERED.value)
     total_recovered = sum(t.amount for t in txns if t.status == models.TransactionStatus.RECOVERED.value)
@@ -51,9 +52,12 @@ def dashboard_summary(db: Session = Depends(get_db)):
 
 
 @router.get("/live-feed")
-def live_feed(limit: int = 20, db: Session = Depends(get_db)):
+def live_feed(limit: int = 20, merchant_name: str = Depends(verify_merchant), db: Session = Depends(get_db)):
     decisions = (
         db.query(models.RetryDecision)
+        .join(models.FailedTransaction, models.RetryDecision.transaction_id == models.FailedTransaction.id)
+        .join(models.Mandate, models.FailedTransaction.mandate_id == models.Mandate.id)
+        .filter(models.Mandate.merchant_name == merchant_name)
         .order_by(models.RetryDecision.id.desc())
         .limit(limit)
         .all()
