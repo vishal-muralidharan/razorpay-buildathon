@@ -38,10 +38,10 @@ export const api = {
     request("/schedule-retry", { method: "POST", body: JSON.stringify({ transaction_id }) }),
   executeRetry: (transaction_id) =>
     request("/execute-retry", { method: "POST", body: JSON.stringify({ transaction_id }) }),
-  chooseDate: (transaction_id, chosen_date) =>
+  chooseDate: (transaction_id, chosen_date, token) =>
     request("/customer-choose-date", {
       method: "POST",
-      body: JSON.stringify({ transaction_id, chosen_date }),
+      body: JSON.stringify({ transaction_id, chosen_date, token }),
     }),
   getAudit: (transactionId) => request(`/audit/${transactionId}`),
   createCustomer: (data) => request("/registration/customers", { method: "POST", body: JSON.stringify(data) }),

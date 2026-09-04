@@ -188,7 +188,36 @@ export default function AuditDrawer({ transactionId, onClose, onChanged }) {
                         <span>{n.channel} {n.simulated ? "(simulated)" : "(live)"}</span>
                         <span>{formatDateTime(n.sent_at)}</span>
                       </div>
-                      <div className="text-sm text-gray-700 font-body">{n.message}</div>
+                      <div className="text-sm text-gray-700 font-body break-words whitespace-pre-wrap">{n.message}</div>
+                      {(() => {
+                        const tokenMatch = n.message.match(/token=([a-zA-Z0-9_.-]+)/);
+                        const token = tokenMatch ? tokenMatch[1] : null;
+                        let dates = [];
+                        try {
+                          dates = JSON.parse(n.self_schedule_options || "[]");
+                        } catch(e) {}
+                        
+                        if (token && dates.length > 0) {
+                          return (
+                            <div className="mt-3 pt-3 border-t border-rzp-border/50">
+                              <div className="text-[10px] uppercase text-gray-500 mb-2">Simulate Customer Action</div>
+                              <div className="flex gap-2">
+                                {dates.map(d => (
+                                  <ActionButton 
+                                    key={d} 
+                                    tone="primary"
+                                    busy={busyAction === `customer-${d}`}
+                                    onClick={() => runAction(`customer-${d}`, () => api.chooseDate(transactionId, d, token))}
+                                  >
+                                    Pick {d}
+                                  </ActionButton>
+                                ))}
+                              </div>
+                            </div>
+                          );
+                        }
+                        return null;
+                      })()}
                     </div>
                   ))}
                 </div>

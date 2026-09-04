@@ -38,6 +38,7 @@ class ScheduleRetryResponse(BaseModel):
 class CustomerChooseDateRequest(BaseModel):
     transaction_id: int
     chosen_date: datetime
+    token: str
 
 
 class CustomerChooseDateResponse(BaseModel):

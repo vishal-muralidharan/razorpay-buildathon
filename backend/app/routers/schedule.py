@@ -9,7 +9,8 @@ from app.scheduler import decide_retry, MAX_RETRIES
 from app.nudge import build_template_variables, build_self_schedule_options, send_nudge
 from app.razorpay_client import attempt_recurring_debit
 from app.scheduler_setup import scheduler
-from app.auth import verify_merchant
+from app.scheduler_setup import scheduler
+from app.auth import verify_merchant, generate_customer_token
 from app.jobs import execute_retry_job
 
 router = APIRouter(tags=["scheduling"])
@@ -107,6 +108,9 @@ def schedule_retry(req: schemas.ScheduleRetryRequest, merchant_name: str = Depen
     mandate = txn.mandate
     from app.nudge import build_template_variables, build_message_preview, build_self_schedule_options, send_nudge
 
+    token = generate_customer_token(txn.id)
+    self_schedule_link = f"https://pay.vela.com/schedule?token={token}"
+
     template_vars = build_template_variables(
         category=txn.decline_category,
         customer_name=customer.name,
@@ -114,6 +118,7 @@ def schedule_retry(req: schemas.ScheduleRetryRequest, merchant_name: str = Depen
         amount=txn.amount,
         mandate_date=txn.failed_at,
         recommended_date=decision["scheduled_time"],
+        link=self_schedule_link,
     )
     message_preview = build_message_preview(
         category=txn.decline_category,
@@ -122,6 +127,7 @@ def schedule_retry(req: schemas.ScheduleRetryRequest, merchant_name: str = Depen
         amount=txn.amount,
         mandate_date=txn.failed_at,
         recommended_date=decision["scheduled_time"],
+        link=self_schedule_link,
     )
     options = build_self_schedule_options(decision["scheduled_time"])
     send_result = send_nudge(customer.phone, txn.decline_category, template_vars, channel="whatsapp")
