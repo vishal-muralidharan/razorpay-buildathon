@@ -65,6 +65,13 @@ def _random_phone():
 
 def run_seed(db):
     assert os.getenv("ENABLE_AUTO_SEED") == "true", "ENABLE_AUTO_SEED must be explicitly set to 'true' to run the seed script."
+    print("=" * 60)
+    print("WARNING: Generating synthetic demo data.")
+    print("This data uses 'sim_cust_' and 'sim_token_' prefixes for")
+    print("Razorpay credentials. These are strictly demo-only tokens,")
+    print("safely intercepted by the local simulator and will NEVER")
+    print("touch a path where real money flows.")
+    print("=" * 60)
     now = datetime.now(timezone.utc)
 
     # --- Bank status (mock uptime tracker) -----------------------------
@@ -96,8 +103,8 @@ def run_seed(db):
             subscription_age_days=random.randint(30, 480),
             merchant_name=random.choice(MERCHANTS),
             bank_name=random.choice(BANKS),
-            razorpay_customer_id=f"cust_{i}_{random.randint(1000,9999)}",
-            razorpay_token_id=f"token_{i}_{random.randint(1000,9999)}"
+            razorpay_customer_id=f"sim_cust_{i}_{random.randint(1000,9999)}",
+            razorpay_token_id=f"sim_token_{i}_{random.randint(1000,9999)}"
         )
         db.add(mandate)
         db.flush()

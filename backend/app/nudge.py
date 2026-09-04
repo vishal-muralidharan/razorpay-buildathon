@@ -13,10 +13,10 @@ import json
 from datetime import datetime, timedelta
 
 CATEGORY_TEMPLATE_SIDS = {
-    "INSUFFICIENT_FUNDS": "HXabc123insufficient",
-    "BANK_OUTAGE": "HXdef456bankoutage",
-    "MANDATE_EXPIRED": "HXghi789mandateexpired",
-    "MANDATE_CANCELLED": "HXjkl012mandatecancelled",
+    "INSUFFICIENT_FUNDS": os.getenv("TEMPLATE_SID_INSUFFICIENT_FUNDS", "HXabc123insufficient"),
+    "BANK_OUTAGE": os.getenv("TEMPLATE_SID_BANK_OUTAGE", "HXdef456bankoutage"),
+    "MANDATE_EXPIRED": os.getenv("TEMPLATE_SID_MANDATE_EXPIRED", "HXghi789mandateexpired"),
+    "MANDATE_CANCELLED": os.getenv("TEMPLATE_SID_MANDATE_CANCELLED", "HXjkl012mandatecancelled"),
 }
 
 TWILIO_ACCOUNT_SID = os.getenv("TWILIO_ACCOUNT_SID")
