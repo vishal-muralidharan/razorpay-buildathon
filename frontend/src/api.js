@@ -44,4 +44,7 @@ export const api = {
       body: JSON.stringify({ transaction_id, chosen_date }),
     }),
   getAudit: (transactionId) => request(`/audit/${transactionId}`),
+  createCustomer: (data) => request("/registration/customers", { method: "POST", body: JSON.stringify(data) }),
+  createOrder: (data) => request("/registration/orders", { method: "POST", body: JSON.stringify(data) }),
+  verifyRegistration: (data) => request("/registration/verify", { method: "POST", body: JSON.stringify(data) }),
 };
