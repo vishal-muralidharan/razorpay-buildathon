@@ -146,7 +146,15 @@ def reconciliation_sweep_job():
 
 
 def detect_bank_outages_job():
-    """Runs every 5 minutes to infer bank outages from recent decline spikes."""
+    """Runs every 5 minutes to infer bank outages from recent decline spikes.
+    
+    TODO (Live Bank Status):
+    This infers outages from our own decline-rate spikes since there's no public 
+    NPCI/bank uptime feed to subscribe to. Keep this as the baseline fallback. 
+    If a payment partner (e.g. Razorpay, Setu) offers a real live feed to plug 
+    in instead, pipe those into the already existing `POST /webhook/bank-status` 
+    endpoint to instantly update the BankStatus table.
+    """
     db: Session = SessionLocal()
     try:
         now = datetime.now(timezone.utc)

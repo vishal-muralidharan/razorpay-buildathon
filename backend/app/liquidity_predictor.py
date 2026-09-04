@@ -28,7 +28,13 @@ _shap_explainer = None
 
 def train_mock_model():
     """Builds and trains a mock XGBoost model on synthetic Account Aggregator features.
-    In production, this would be trained offline on real Setu/Finvu balance data."""
+    
+    TODO (Account Aggregator Integration):
+    Get real balance signals via an Account Aggregator integration (Setu/Finvu).
+    This requires a separate consent-flow/compliance project, scoped separately.
+    Once real data exists, we should train offline and load a versioned model 
+    artifact (.pkl/.onnx) at startup instead of training dynamically on synthetic data.
+    """
     global _ml_model, _shap_explainer
     if not ML_AVAILABLE:
         print("ML libraries not installed. Skipping model training.")
