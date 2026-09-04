@@ -3,15 +3,18 @@ from sqlalchemy.orm import Session
 
 from app import models, schemas, audit
 from app.database import get_db
+from app.auth import verify_merchant
 
 router = APIRouter(tags=["customer"])
 
 
 @router.post("/customer-choose-date", response_model=schemas.CustomerChooseDateResponse)
-def customer_choose_date(req: schemas.CustomerChooseDateRequest, db: Session = Depends(get_db)):
+def customer_choose_date(req: schemas.CustomerChooseDateRequest, merchant_name: str = Depends(verify_merchant), db: Session = Depends(get_db)):
     txn = db.query(models.FailedTransaction).get(req.transaction_id)
     if not txn:
         raise HTTPException(status_code=404, detail="Transaction not found")
+    if txn.mandate.merchant_name != merchant_name:
+        raise HTTPException(status_code=403, detail="Unauthorized for this transaction")
 
     txn.customer_chosen_date = req.chosen_date
     txn.status = models.TransactionStatus.AWAITING_CUSTOMER.value

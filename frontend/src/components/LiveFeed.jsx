@@ -46,7 +46,7 @@ export default function LiveFeed({ feed, onSelect }) {
                 {CATEGORY_LABEL[item.decline_category]} → {formatDateTime(item.predicted_window)}
               </span>
               <span className="font-mono text-[11px] text-gray-400">
-                {Math.round(item.predicted_success_prob * 100)}% conf.
+                {Math.round(item.predicted_success_prob * 100)}% confidence
               </span>
             </div>
           </button>

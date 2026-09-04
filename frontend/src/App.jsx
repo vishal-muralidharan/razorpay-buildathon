@@ -63,20 +63,17 @@ export default function App() {
       <header className="border-b border-rzp-border px-6 md:px-10 py-6 bg-white shadow-sm">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div>
-            <div className="text-[11px] uppercase tracking-[0.2em] text-rzp-blue font-mono mb-1 font-semibold">
-              Track 03 · AI Revenue Recovery
-            </div>
             <h1 className="font-display text-2xl md:text-3xl text-rzp-navy font-bold">
               Mandate Resurrection Agent
             </h1>
             <p className="text-sm text-gray-500 mt-1 max-w-xl font-body">
-              Diagnoses failed UPI Autopay / e-NACH debits, predicts the retry window most
-              likely to succeed, and spends NPCI's 3-attempt budget on purpose instead of by habit.
+              Diagnoses failed UPI Autopay payments, predicts the day a retry is most
+              likely to succeed, and stays within NPCI's 3-attempt limit.
             </p>
           </div>
           {connError && (
             <div className="text-xs font-mono text-status-error border border-status-error/40 rounded px-3 py-1.5 bg-status-error/10">
-              Backend unreachable — is uvicorn running on :8000?
+              Can't reach the server right now. Please try again shortly.
             </div>
           )}
         </div>
@@ -104,8 +101,8 @@ export default function App() {
       </main>
 
       <footer className="max-w-7xl mx-auto px-6 md:px-10 pb-10 text-xs text-gray-400 font-mono">
-        Compliance rules enforced server-side: max 3 NPCI retries/cycle · no scheduling 18:00–21:00 ·
-        every decision hash-chained in the audit ledger.
+        Retries are capped at 3 per payment and never scheduled between 6–9pm, in line
+        with NPCI rules. Every decision is logged to a tamper-evident audit trail.
       </footer>
 
       <AuditDrawer

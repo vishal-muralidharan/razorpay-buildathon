@@ -105,9 +105,17 @@ def schedule_retry(req: schemas.ScheduleRetryRequest, merchant_name: str = Depen
     # Fire the customer nudge for this decision.
     customer = db.query(models.Customer).get(txn.customer_id)
     mandate = txn.mandate
-    from app.nudge import build_template_variables, build_self_schedule_options, send_nudge
+    from app.nudge import build_template_variables, build_message_preview, build_self_schedule_options, send_nudge
 
     template_vars = build_template_variables(
+        category=txn.decline_category,
+        customer_name=customer.name,
+        merchant=mandate.merchant_name,
+        amount=txn.amount,
+        mandate_date=txn.failed_at,
+        recommended_date=decision["scheduled_time"],
+    )
+    message_preview = build_message_preview(
         category=txn.decline_category,
         customer_name=customer.name,
         merchant=mandate.merchant_name,
@@ -122,15 +130,15 @@ def schedule_retry(req: schemas.ScheduleRetryRequest, merchant_name: str = Depen
     db.add(models.NudgeLog(
         transaction_id=txn.id,
         channel="whatsapp",
-        message=json.dumps(template_vars),
+        message=message_preview,
         self_schedule_options=json.dumps(options),
         simulated=send_result.get("simulated", True),
     ))
     db.commit()
 
     audit.log_step(db, txn.id, "NUDGE_SENT", {
-        "channel": "whatsapp", "template_vars": template_vars, "self_schedule_options": options,
-        "send_result": send_result,
+        "channel": "whatsapp", "message_preview": message_preview, "template_vars": template_vars,
+        "self_schedule_options": options, "send_result": send_result,
     })
 
     return schemas.ScheduleRetryResponse(

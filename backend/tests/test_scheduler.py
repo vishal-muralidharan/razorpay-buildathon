@@ -3,9 +3,6 @@ import sys
 from datetime import datetime, timezone
 from unittest.mock import MagicMock, patch
 
-# Mock xgboost to bypass libomp requirement on MacOS during tests
-sys.modules["xgboost"] = MagicMock()
-
 from app.scheduler import decide_retry, MAX_RETRIES
 from app.models import FailedTransaction, Mandate, TransactionStatus
 

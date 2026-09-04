@@ -16,7 +16,7 @@ Blindly retrying all failures is inefficient and burns through the hard NPCI 3-r
 ### How to test
 1. Open the frontend dashboard and select a failed transaction.
 2. Click the **Diagnose** button.
-3. Observe the transaction state change from `FAILED` to a categorized state (e.g., `INSUFFICIENT_FUNDS_DIAGNOSED`).
+3. The transaction's decline code and category now show on the row (e.g. "U19 · Insufficient funds") - the transaction's overall status doesn't change yet, only its diagnosis.
 4. **API Test**: Send a `POST` request to `/diagnose` with a raw failure code and verify the correct category is returned.
 
 ---
@@ -118,7 +118,7 @@ This is the final step of the pipeline that actually executes the mandate and re
 
 ### How to test
 1. **Simulation Mode**: Run the app without Razorpay credentials in `.env`. Click **Execute via Razorpay** on the frontend and observe the simulated success.
-2. **Live Test Mode**: Export `RAZORPAY_KEY_ID` and `RAZORPAY_KEY_SECRET`. Click **Execute via Razorpay** and verify that a real API call is placed to the Razorpay test environment.
+2. **Live Test Mode**: Export `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET`, and `RAZORPAY_WEBHOOK_SECRET` (requires a real mandate token - see "Adding real Razorpay UPI" in the main README). Click **Execute via Razorpay**: the transaction moves to `PENDING_CONFIRMATION` while the real API call is in flight, and resolves to `RECOVERED` or back to `PENDING`/`EXHAUSTED` only once Razorpay's webhook calls back - it will not resolve immediately the way simulation mode does.
 
 ---
 

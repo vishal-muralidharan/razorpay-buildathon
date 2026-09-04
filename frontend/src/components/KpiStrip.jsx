@@ -36,16 +36,16 @@ export default function KpiStrip({ summary }) {
         sub={`of ${summary.total_transactions} failures`}
       />
       <Stat
-        label="Cap exhausted"
+        label="Retries used up"
         value={summary.exhausted_count}
         accent="text-status-error"
-        sub="3/3 NPCI attempts used"
+        sub="Couldn't recover in 3 tries"
       />
       <Stat
-        label="Wasted retries avoided"
+        label="Smarter retries"
         value={summary.api_calls_saved_estimate}
         accent="text-rzp-blue"
-        sub="vs. blind 24h retries"
+        sub="Timed instead of immediate"
       />
     </div>
   );

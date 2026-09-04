@@ -22,6 +22,7 @@ def dashboard_summary(merchant_name: str = Depends(verify_merchant), db: Session
             models.TransactionStatus.PENDING.value,
             models.TransactionStatus.SCHEDULED.value,
             models.TransactionStatus.AWAITING_CUSTOMER.value,
+            models.TransactionStatus.PENDING_CONFIRMATION.value,
         )
     )
     total = len(txns)

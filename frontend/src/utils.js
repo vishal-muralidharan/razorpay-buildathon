@@ -17,15 +17,17 @@ export const CATEGORY_COLOR = {
 export const STATUS_LABEL = {
   PENDING: "Pending diagnosis",
   SCHEDULED: "Retry scheduled",
+  PENDING_CONFIRMATION: "Awaiting bank confirmation",
   AWAITING_CUSTOMER: "Awaiting customer",
   RECOVERED: "Recovered",
-  EXHAUSTED: "Cap exhausted",
-  CANCELLED: "Mandate dead",
+  EXHAUSTED: "Retries used up",
+  CANCELLED: "Mandate cancelled",
 };
 
 export const STATUS_STYLE = {
   PENDING: "bg-gray-100 text-gray-600 border-gray-200",
   SCHEDULED: "bg-status-warning_bg text-status-warning border-status-warning/40",
+  PENDING_CONFIRMATION: "bg-rzp-lightblue text-rzp-blue border-rzp-blue/40",
   AWAITING_CUSTOMER: "bg-rzp-lightblue text-rzp-blue border-rzp-blue/40",
   RECOVERED: "bg-status-success_bg text-status-success border-status-success/40",
   EXHAUSTED: "bg-status-error_bg text-status-error border-status-error/40",

@@ -1,3 +1,4 @@
+import random
 from datetime import datetime, timedelta, timezone
 from sqlalchemy.orm import Session
 from app.database import SessionLocal
@@ -63,15 +64,47 @@ def execute_retry_job(decision_id: int):
             idempotency_key=idempotency_key,
         )
 
-        txn.status = models.TransactionStatus.PENDING_CONFIRMATION.value
-        db.commit()
-        
-        audit.log_step(db, txn.id, "RETRY_INITIATED", {
-            "attempt_number": decision.attempt_number,
-            "idempotency_key": idempotency_key,
-            "razorpay_result": result,
-        })
-        
+        if result.get("simulated"):
+            # No real Razorpay webhook will ever arrive for a simulated
+            # attempt, so resolve the outcome immediately here instead of
+            # leaving the transaction stuck in PENDING_CONFIRMATION forever.
+            # Success probability mirrors the liquidity predictor's
+            # confidence score, so better-timed retries visibly succeed
+            # more often in the demo.
+            success = random.random() < max(0.15, min(decision.predicted_success_prob, 0.95))
+            decision.outcome = "SUCCESS" if success else "FAILURE"
+            result["status"] = "captured" if success else "failed"
+            if success:
+                txn.status = models.TransactionStatus.RECOVERED.value
+                txn.recovered_at = datetime.now(timezone.utc)
+            else:
+                txn.status = (
+                    models.TransactionStatus.EXHAUSTED.value
+                    if txn.retry_count >= MAX_RETRIES
+                    else models.TransactionStatus.PENDING.value
+                )
+            db.commit()
+
+            audit.log_step(db, txn.id, "RETRY_EXECUTED", {
+                "attempt_number": decision.attempt_number,
+                "idempotency_key": idempotency_key,
+                "outcome": decision.outcome,
+                "razorpay_result": result,
+                "note": "Simulated attempt - resolved locally, no real webhook expected.",
+            })
+        else:
+            # Real Razorpay call was placed successfully; the actual
+            # captured/failed outcome will arrive asynchronously via
+            # POST /webhook/razorpay and resolve decision.outcome then.
+            txn.status = models.TransactionStatus.PENDING_CONFIRMATION.value
+            db.commit()
+
+            audit.log_step(db, txn.id, "RETRY_INITIATED", {
+                "attempt_number": decision.attempt_number,
+                "idempotency_key": idempotency_key,
+                "razorpay_result": result,
+            })
+
         return result
     finally:
         db.close()

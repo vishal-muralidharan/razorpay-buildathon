@@ -12,6 +12,11 @@ const STEP_LABEL = {
   SCHEDULING_PAUSED: "Scheduling paused (customer chose date)",
   NUDGE_SENT: "Customer nudge sent",
   RETRY_EXECUTED: "Retry executed",
+  RETRY_INITIATED: "Retry sent to bank",
+  RETRY_RESCHEDULED_BANK_OUTAGE: "Rescheduled - bank still down",
+  WEBHOOK_PAYMENT_CAPTURED: "Bank confirmed payment",
+  WEBHOOK_PAYMENT_FAILED: "Bank confirmed failure",
+  RECONCILIATION_SWEEP: "Missed retry recovered",
   CUSTOMER_SELF_SCHEDULED: "Customer self-scheduled",
 };
 
@@ -124,7 +129,7 @@ export default function AuditDrawer({ transactionId, onClose, onChanged }) {
               <div className="border border-rzp-border bg-rzp-gray rounded-lg p-3 col-span-2">
                 <div className="text-[10px] uppercase tracking-wide text-gray-500 font-body">Merchant / bank</div>
                 <div className="font-mono text-rzp-navy font-medium mt-0.5">
-                  {detail.mandate.merchant_name} · {detail.mandate.bank_name} · sub. age {detail.mandate.subscription_age_days}d
+                  {detail.mandate.merchant_name} · {detail.mandate.bank_name} · customer for {detail.mandate.subscription_age_days} days
                 </div>
               </div>
             </div>
@@ -132,7 +137,7 @@ export default function AuditDrawer({ transactionId, onClose, onChanged }) {
             {/* Demo actions */}
             <div>
               <div className="text-[11px] uppercase tracking-[0.14em] text-gray-500 font-body mb-2">
-                Run the agent
+                Actions
               </div>
               <div className="flex flex-wrap gap-2">
                 <ActionButton
@@ -164,9 +169,9 @@ export default function AuditDrawer({ transactionId, onClose, onChanged }) {
                 </ActionButton>
               </div>
               <p className="text-xs text-gray-400 font-body mt-2">
-                Diagnose classifies the decline code, schedule routes it per the compliance
-                rules and sends the customer nudge, execute simulates the Razorpay debit
-                attempt. Every step writes a hash-chained audit row below.
+                Diagnose works out why the payment failed. Schedule picks the best retry
+                time and follows NPCI's rules automatically. Execute sends the retry to
+                the bank. Every step below is logged and tamper-evident.
               </p>
             </div>
 

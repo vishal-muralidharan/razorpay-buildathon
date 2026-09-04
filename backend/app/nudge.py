@@ -24,6 +24,46 @@ TWILIO_AUTH_TOKEN = os.getenv("TWILIO_AUTH_TOKEN")
 TWILIO_FROM_NUMBER = os.getenv("TWILIO_FROM_NUMBER")
 
 
+CATEGORY_PREVIEW_TEMPLATES = {
+    "INSUFFICIENT_FUNDS": (
+        "Hi {name}! Your {merchant} payment of Rs.{amount} on {mandate_date} didn't go "
+        "through - looks like the balance was a little short that day. We'll auto-retry "
+        "on {recommended_date} when it usually works best for you, or you can pick your "
+        "own date."
+    ),
+    "BANK_OUTAGE": (
+        "Hi {name}, your {merchant} payment of Rs.{amount} couldn't be processed because "
+        "of a temporary issue at your bank's end - not your fault at all. We'll retry "
+        "automatically once your bank is back up."
+    ),
+    "MANDATE_EXPIRED": (
+        "Hi {name}, your Autopay mandate for {merchant} (Rs.{amount}/cycle) has expired, "
+        "so we couldn't debit this cycle. Tap the link below to set up a fresh mandate in "
+        "under a minute."
+    ),
+    "MANDATE_CANCELLED": (
+        "Hi {name}, it looks like your Autopay mandate for {merchant} was cancelled, so we "
+        "couldn't debit this cycle. If that wasn't intentional, tap below to re-enable it."
+    ),
+}
+
+
+def build_message_preview(category: str, customer_name: str, merchant: str, amount: float,
+                           mandate_date: datetime, recommended_date: datetime) -> str:
+    """Renders a human-readable preview of the WhatsApp template for the
+    audit trail and merchant dashboard. The real Twilio send always uses
+    the approved content_sid + template_vars (see send_nudge) - this is
+    display-only, so it never needs Meta approval itself."""
+    template = CATEGORY_PREVIEW_TEMPLATES.get(category, CATEGORY_PREVIEW_TEMPLATES["INSUFFICIENT_FUNDS"])
+    return template.format(
+        name=customer_name,
+        merchant=merchant,
+        amount=f"{amount:,.0f}",
+        mandate_date=mandate_date.strftime("%d %b"),
+        recommended_date=recommended_date.strftime("%d %b") if recommended_date else "soon",
+    )
+
+
 def build_template_variables(category: str, customer_name: str, merchant: str, amount: float,
                    mandate_date: datetime, recommended_date: datetime) -> dict:
     """Builds a dictionary of variables mapped to the template's {{1}}, {{2}} placeholders."""

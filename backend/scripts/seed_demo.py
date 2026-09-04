@@ -9,12 +9,22 @@ Seeds a synthetic but realistic dataset:
   - 55 failed transactions spread across all 4 decline categories with
     varied timestamps, decline codes, and retry counts
 
-Run standalone with `python -m app.seed` (uses its own DB session), or
-imported and called with an existing session (as main.py does on startup).
+Run from the backend/ directory (after `alembic upgrade head`):
+    ENABLE_AUTO_SEED=true python -m scripts.seed_demo
+
+This intentionally does NOT run automatically on server startup - see
+ENABLE_AUTO_SEED gate below - so a real deployment can never accidentally
+wipe/reseed a production database just by booting the app.
 """
 import os
+import sys
 import random
 from datetime import datetime, timedelta, timezone
+
+# Allows `python scripts/seed_demo.py` to also work directly (not just
+# `python -m scripts.seed_demo`) by putting backend/ on the path, the same
+# way alembic/env.py does.
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from app import models
 from app.decline_parser import parse_decline_code
