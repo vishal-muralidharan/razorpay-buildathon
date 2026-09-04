@@ -1,10 +1,12 @@
 """
 Database engine and session configuration.
 
-Uses SQLite by default (fast to set up, zero external dependencies -
-ideal for a buildathon demo). Swap DATABASE_URL to a Postgres DSN
-(e.g. postgresql+psycopg2://user:pass@host/db) for production without
-changing any other code, since all access goes through SQLAlchemy.
+TODO (Production Database):
+Uses SQLite by default (fast to set up, zero external dependencies). 
+However, for real concurrent webhook traffic, we must swap to Postgres 
+(change DATABASE_URL) to ensure row-level locking (`with_for_update`) 
+is properly enforced to keep the audit-ledger writes correctly serialized.
+No schema changes are needed; this is a standard Alembic-driven swap.
 """
 import os
 from sqlalchemy import create_engine
