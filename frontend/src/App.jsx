@@ -31,8 +31,8 @@ export default function App() {
     }
   }, []);
 
-  const refreshTransactions = useCallback(async () => {
-    setLoadingTxns(true);
+  const refreshTransactions = useCallback(async (background = false) => {
+    if (!background) setLoadingTxns(true);
     try {
       const params = {};
       if (filters.category) params.category = filters.category;
@@ -42,7 +42,7 @@ export default function App() {
     } catch {
       /* surfaced via connError from refresh() */
     } finally {
-      setLoadingTxns(false);
+      if (!background) setLoadingTxns(false);
     }
   }, [filters]);
 
@@ -51,7 +51,7 @@ export default function App() {
     refreshTransactions();
     const id = setInterval(() => {
       refresh();
-      refreshTransactions();
+      refreshTransactions(true); // pass background=true
     }, POLL_MS);
     return () => clearInterval(id);
   }, [refresh, refreshTransactions]);
