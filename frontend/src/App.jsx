@@ -7,6 +7,7 @@ import TransactionTable from "./components/TransactionTable";
 import { Routes, Route, Link } from "react-router-dom";
 import AuditDrawer from "./components/AuditDrawer";
 import Checkout from "./Checkout";
+import Schedule from "./Schedule";
 
 const POLL_MS = 8000;
 
@@ -47,13 +48,13 @@ export default function App() {
 
   useEffect(() => {
     refresh();
-    const id = setInterval(refresh, POLL_MS);
-    return () => clearInterval(id);
-  }, [refresh]);
-
-  useEffect(() => {
     refreshTransactions();
-  }, [refreshTransactions]);
+    const id = setInterval(() => {
+      refresh();
+      refreshTransactions();
+    }, POLL_MS);
+    return () => clearInterval(id);
+  }, [refresh, refreshTransactions]);
 
   function handleChanged() {
     refresh();
@@ -127,6 +128,7 @@ export default function App() {
       <Routes>
         <Route path="/" element={<Dashboard />} />
         <Route path="/checkout" element={<Checkout />} />
+        <Route path="/schedule" element={<Schedule />} />
       </Routes>
     </div>
   );
