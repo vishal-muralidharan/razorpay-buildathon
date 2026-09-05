@@ -55,22 +55,15 @@ Open `http://localhost:5173`. It talks to the backend at
 `http://localhost:8000` by default — override with `VITE_API_BASE_URL` in
 `frontend/.env` if you run the API elsewhere.
 
-### Optional: real Razorpay / Twilio credentials
+### Configuration (.env)
 
-Both integrations run in a clearly-labeled **simulation mode** out of the
-box, so the whole system works offline with no keys. To use real
-test-mode APIs, set these env vars before starting the backend:
+The project includes a `backend/.env.example` file that outlines the optional API keys (Razorpay, Twilio, Auth0). You do **not** need to provide these for local testing or hackathon submissions — the system automatically falls back to simulation mode (synthetic data and mock tokens) if they are missing. 
 
+If you plan to use real test-mode APIs, copy the example file:
 ```bash
-export RAZORPAY_KEY_ID=rzp_test_xxx
-export RAZORPAY_KEY_SECRET=xxx
-export TWILIO_ACCOUNT_SID=xxx
-export TWILIO_AUTH_TOKEN=xxx
-export TWILIO_FROM_NUMBER=+1415xxxxxxx
+cp backend/.env.example backend/.env
 ```
-
-No code changes needed — `app/razorpay_client.py` and `app/nudge.py` check
-for these and fall back to simulation automatically if they're absent.
+And populate it with your `RAZORPAY_KEY_ID`, `TWILIO_ACCOUNT_SID`, etc. No code changes are needed — `app/razorpay_client.py` and `app/nudge.py` check for these and fall back to simulation automatically.
 
 ---
 
@@ -144,20 +137,23 @@ Full interactive docs at `/docs` once the backend is running.
 
 ---
 
-## Demo script
+## Live Demo (Dynamic Data)
 
-1. Open the dashboard — 55 seeded failures, broken down by root cause.
-2. Click an `INSUFFICIENT_FUNDS` transaction → **Diagnose** → **Schedule
-   retry**: watch it get routed to a predicted high-balance date instead
-   of an immediate retry, and a WhatsApp nudge appear below.
-3. Click **Execute via Razorpay** to simulate the debit attempt landing
-   on that date.
-4. Repeat schedule → execute two more times, then click **Try 4th retry**
-   — the API returns 400 and the transaction is marked cap-exhausted.
-5. Scroll the audit ledger for that transaction: every step is
-   hash-chained, `chain_valid: true`.
-6. Back on the dashboard, watch ₹ recovered / at risk and the recovery
-   rate update.
+Since the dashboard auto-refreshes every 8 seconds, you can easily demonstrate the system's real-time reactivity without needing external webhooks.
+
+1. Start both the backend and frontend servers as described in the Quick Start.
+2. Open the Merchant Dashboard at `http://localhost:5173`.
+3. In a new terminal, activate the backend environment and run the webhook simulation script:
+   ```bash
+   cd backend
+   source venv/bin/activate
+   python -m scripts.simulate_webhook
+   ```
+4. This script injects a randomized failed transaction directly into the database.
+5. **Watch the dashboard** — within 8 seconds (no page refresh required!), the new transaction will magically appear in the "Failed Transactions" table with a `Pending diagnosis` status.
+6. Click the transaction, hit **Diagnose & Schedule**, and watch the ML engine process it and push it into the "Live decision feed".
+7. Click **Execute via Razorpay** to simulate the debit attempt landing on that date.
+8. Scroll the audit ledger for that transaction to see the SHA-256 hash-chained logs.
 
 ## Adding real Razorpay UPI
 
