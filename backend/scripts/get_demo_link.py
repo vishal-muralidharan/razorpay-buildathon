@@ -23,7 +23,7 @@ def get_demo_link():
     
     link = f"http://localhost:5173/schedule?token={token}"
     
-    print(f"🔗 Customer Self-Serve Link for Transaction #{txn.id} ({txn.customer.name})")
+    print(f"🔗 Customer Self-Serve Link for Transaction #{txn.id} ({txn.mandate.customer.name})")
     print(f"\n{link}\n")
     print("Click or copy this link into your browser to show the Customer UI.")
 
