@@ -5,6 +5,7 @@ from app.database import Base, engine, SessionLocal
 from app import models  # noqa: F401 - ensures models are registered before create_all
 from app.routers import diagnose, predict, schedule, customer, audit_router, dashboard, transactions, webhook, registration
 
+Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
     title="Mandate Resurrection Agent",
