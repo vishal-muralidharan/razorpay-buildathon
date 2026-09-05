@@ -61,8 +61,7 @@ export default function App() {
     refreshTransactions();
   }
 
-  function Dashboard() {
-    return (
+  const dashboardContent = (
       <>
         <main className="max-w-7xl mx-auto px-6 md:px-10 py-8 space-y-6">
           <KpiStrip summary={summary} />
@@ -97,7 +96,6 @@ export default function App() {
         />
       </>
     );
-  }
 
   return (
     <div className="min-h-screen font-body text-rzp-navy">
@@ -126,7 +124,7 @@ export default function App() {
       </header>
       
       <Routes>
-        <Route path="/" element={<Dashboard />} />
+        <Route path="/" element={dashboardContent} />
         <Route path="/checkout" element={<Checkout />} />
         <Route path="/schedule" element={<Schedule />} />
       </Routes>
