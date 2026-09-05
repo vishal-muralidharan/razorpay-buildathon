@@ -36,7 +36,7 @@ def inject_synthetic_failure():
         decline_code=code,
         decline_category=category,
         failed_at=datetime.now(timezone.utc),
-        status=models.TransactionStatus.PENDING_DIAGNOSIS.value,
+        status=models.TransactionStatus.PENDING.value,
         retry_count=0
     )
     
