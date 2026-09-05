@@ -44,8 +44,12 @@ export function formatINR(amount) {
 
 export function formatDateTime(iso) {
   if (!iso) return "—";
-  const d = new Date(iso);
+  // SQLite/FastAPI drops the timezone, but we know it's UTC.
+  // Append 'Z' to force JavaScript to parse it as UTC instead of local time.
+  const dateStr = iso.endsWith("Z") || iso.includes("+") ? iso : iso + "Z";
+  const d = new Date(dateStr);
   return d.toLocaleString("en-IN", {
+    timeZone: "Asia/Kolkata",
     day: "2-digit",
     month: "short",
     hour: "2-digit",
