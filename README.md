@@ -152,8 +152,13 @@ Since the dashboard auto-refreshes every 8 seconds, you can easily demonstrate t
 4. This script injects a randomized failed transaction directly into the database.
 5. **Watch the dashboard** — within 8 seconds (no page refresh required!), the new transaction will magically appear in the "Failed Transactions" table with a `Pending diagnosis` status.
 6. Click the transaction, hit **Diagnose & Schedule**, and watch the ML engine process it and push it into the "Live decision feed".
-7. Click **Execute via Razorpay** to simulate the debit attempt landing on that date.
-8. Scroll the audit ledger for that transaction to see the SHA-256 hash-chained logs.
+7. (Optional) To demonstrate the frictionless Customer Self-Scheduling UI, generate a unique link for the newly failed transaction by running:
+   ```bash
+   python -m scripts.get_demo_link
+   ```
+   Click the generated URL to open the customer-facing scheduling flow!
+8. Click **Execute via Razorpay** to simulate the debit attempt landing on that date.
+9. Scroll the audit ledger for that transaction to see the SHA-256 hash-chained logs.
 
 ## Adding real Razorpay UPI
 
