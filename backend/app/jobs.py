@@ -1,11 +1,21 @@
 import random
+import logging
 from datetime import datetime, timedelta, timezone
 from sqlalchemy.orm import Session
+from pythonjsonlogger import jsonlogger
 from app.database import SessionLocal
 from app import models, audit
 from app.razorpay_client import attempt_recurring_debit
 from app.scheduler import MAX_RETRIES, BANK_OUTAGE_RECHECK_HOURS, _push_out_of_peak_hours
 from app.scheduler_setup import scheduler
+
+logger = logging.getLogger("jobs")
+logger.setLevel(logging.INFO)
+logHandler = logging.StreamHandler()
+formatter = jsonlogger.JsonFormatter('%(asctime)s %(levelname)s %(name)s %(message)s')
+logHandler.setFormatter(formatter)
+if not logger.handlers:
+    logger.addHandler(logHandler)
 
 def execute_retry_job(decision_id: int):
     db: Session = SessionLocal()
@@ -187,7 +197,7 @@ def detect_bank_outages_job():
                 if bank.status != "DOWN":
                     bank.status = "DOWN"
                     bank.updated_at = now
-                    print(f"BankOutageDetector: {bank.bank_name} marked DOWN (outage spike detected)")
+                    logger.info("Bank marked DOWN due to outage spike", extra={"bank_name": bank.bank_name})
                 bank.normal_windows_count = 0
             else:
                 # Normal window
@@ -195,10 +205,10 @@ def detect_bank_outages_job():
                 if bank.normal_windows_count >= 3 and bank.status == "DOWN":
                     bank.status = "UP"
                     bank.updated_at = now
-                    print(f"BankOutageDetector: {bank.bank_name} marked UP (recovered after hysteresis)")
+                    logger.info("Bank marked UP after recovery hysteresis", extra={"bank_name": bank.bank_name})
         
         db.commit()
     except Exception as e:
-        print(f"Error in detect_bank_outages_job: {e}")
+        logger.error("Error in detect_bank_outages_job", extra={"error": str(e)})
     finally:
         db.close()

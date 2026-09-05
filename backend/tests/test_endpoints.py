@@ -89,6 +89,7 @@ def test_previously_unauthenticated_endpoints_require_auth(client, path, method)
 def test_customer_choose_date_requires_auth(client):
     resp = client.post("/customer-choose-date", json={
         "transaction_id": 1, "chosen_date": "2026-09-15T10:00:00Z",
+        "token": "invalid_jwt_token_here"
     })
     assert resp.status_code == 401
 

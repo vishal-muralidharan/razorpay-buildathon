@@ -20,6 +20,7 @@ import hashlib
 from datetime import datetime, timezone
 
 import requests
+from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
 
 RAZORPAY_KEY_ID = os.getenv("RAZORPAY_KEY_ID")
 RAZORPAY_KEY_SECRET = os.getenv("RAZORPAY_KEY_SECRET")
@@ -52,7 +53,9 @@ def attempt_recurring_debit(amount: float, predicted_success_prob: float, notes:
         "Content-Type": "application/json",
         "X-Razorpay-Idempotency-Key": idempotency_key
     }
-    try:
+
+    @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=2, max=10), retry=retry_if_exception_type(requests.RequestException))
+    def _execute_request():
         resp = requests.post(
             f"{RAZORPAY_BASE_URL}/payments/create/recurring",
             json={
@@ -67,8 +70,10 @@ def attempt_recurring_debit(amount: float, predicted_success_prob: float, notes:
             timeout=10,
         )
         resp.raise_for_status()
-        data = resp.json()
+        return resp.json()
         
+    try:
+        data = _execute_request()
         result = _simulated_attempt(amount, predicted_success_prob)
         result["simulated"] = False
         result["razorpay_payment_id"] = data.get("razorpay_payment_id") or data.get("id")
@@ -89,7 +94,8 @@ def create_customer(name: str, email: str, contact: str) -> dict:
     auth = base64.b64encode(f"{RAZORPAY_KEY_ID}:{RAZORPAY_KEY_SECRET}".encode()).decode()
     headers = {"Authorization": f"Basic {auth}", "Content-Type": "application/json"}
     
-    try:
+    @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=2, max=10), retry=retry_if_exception_type(requests.RequestException))
+    def _execute_request():
         resp = requests.post(
             f"{RAZORPAY_BASE_URL}/customers",
             json={"name": name, "email": email, "contact": contact},
@@ -97,7 +103,10 @@ def create_customer(name: str, email: str, contact: str) -> dict:
             timeout=10,
         )
         resp.raise_for_status()
-        data = resp.json()
+        return resp.json()
+        
+    try:
+        data = _execute_request()
         data["simulated"] = False
         return data
     except requests.RequestException as exc:
@@ -111,7 +120,8 @@ def create_mandate_order(amount: float, customer_id: str, receipt: str) -> dict:
     auth = base64.b64encode(f"{RAZORPAY_KEY_ID}:{RAZORPAY_KEY_SECRET}".encode()).decode()
     headers = {"Authorization": f"Basic {auth}", "Content-Type": "application/json"}
     
-    try:
+    @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=2, max=10), retry=retry_if_exception_type(requests.RequestException))
+    def _execute_request():
         resp = requests.post(
             f"{RAZORPAY_BASE_URL}/orders",
             json={
@@ -130,7 +140,10 @@ def create_mandate_order(amount: float, customer_id: str, receipt: str) -> dict:
             timeout=10,
         )
         resp.raise_for_status()
-        data = resp.json()
+        return resp.json()
+        
+    try:
+        data = _execute_request()
         data["simulated"] = False
         return data
     except requests.RequestException as exc:
@@ -157,14 +170,18 @@ def fetch_payment(payment_id: str) -> dict:
     auth = base64.b64encode(f"{RAZORPAY_KEY_ID}:{RAZORPAY_KEY_SECRET}".encode()).decode()
     headers = {"Authorization": f"Basic {auth}"}
     
-    try:
+    @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=2, max=10), retry=retry_if_exception_type(requests.RequestException))
+    def _execute_request():
         resp = requests.get(
             f"{RAZORPAY_BASE_URL}/payments/{payment_id}",
             headers=headers,
             timeout=10,
         )
         resp.raise_for_status()
-        data = resp.json()
+        return resp.json()
+        
+    try:
+        data = _execute_request()
         data["simulated"] = False
         return data
     except requests.RequestException as exc:
