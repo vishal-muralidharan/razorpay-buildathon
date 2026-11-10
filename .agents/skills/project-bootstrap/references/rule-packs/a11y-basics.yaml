@@ -1,0 +1,51 @@
+id: a11y-basics
+version: 1
+title: Accessibility Fundamentals
+applies_when:
+  platforms: [web, pwa, desktop]
+  hints: [a11y, accessibility, html]
+summary: |
+  Core accessibility standards for keyboard, screen reader, and visual users.
+  Enforces semantic markup, visible focus indicators, color contrast, and image alt text.
+rules:
+  - id: a11y-semantic-html
+    area: design
+    text: "Use semantic HTML elements instead of generic divs with click handlers."
+    enforced_by: manual
+
+  - id: a11y-visible-focus
+    area: design
+    text: "Interactive elements must display high-contrast visible focus indicators."
+    enforced_by: manual
+
+  - id: a11y-aa-contrast
+    area: design
+    text: "Text and interactive controls must meet WCAG AA contrast standards."
+    enforced_by: manual
+
+  - id: a11y-icon-button-labels
+    area: design
+    text: "Icon-only controls must provide an accessible text label."
+    enforced_by: manual
+
+  - id: a11y-img-has-alt
+    area: design
+    text: "Image tags must include an alt attribute on the same tag line."
+    enforced_by: test
+    check:
+      type: forbid
+      pattern: '<img\b(?![^>]*\balt\s*=)[^>]*>'
+      include: ["**/*.html", "**/*.htm", "src/**/*.{jsx,tsx,vue,svelte,html}"]
+      hint: "Add an alt attribute to the img tag. Use alt=\"\" for decorative images."
+      examples:
+        bad:
+          - '<img src="/hero.png">'
+          - '<img src="avatar.jpg" className="avatar" />'
+        good:
+          - '<img src="/hero.png" alt="Company logo" />'
+          - '<img src="decoration.svg" alt="" />'
+          - '<Image src="/hero.png" />'
+verify_checks:
+  - "Navigate through the entire interface using only the Tab and Shift+Tab keys."
+  - "Inspect focus outlines in high contrast mode."
+notes: "Multi-line img tags where alt is on a subsequent line are not matched by the single-line check."

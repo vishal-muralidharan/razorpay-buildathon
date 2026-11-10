@@ -1,0 +1,40 @@
+id: motion-basics
+version: 1
+title: Motion and Transitions
+applies_when:
+  platforms: [web, pwa]
+  hints: [css, animation, motion]
+summary: |
+  Performance and accessibility best practices for UI animation.
+  Enforces reduced motion preferences, GPU-accelerated properties, and specific transition targets.
+rules:
+  - id: motion-respect-reduced
+    area: motion
+    text: "Transitions and animations must respect prefers-reduced-motion media queries."
+    enforced_by: manual
+
+  - id: motion-transform-opacity-only
+    area: motion
+    text: "Smooth animations must target transform and opacity properties only."
+    enforced_by: manual
+
+  - id: motion-no-transition-all
+    area: motion
+    text: "Never use transition: all in stylesheets; target explicit CSS properties instead."
+    enforced_by: test
+    check:
+      type: forbid
+      pattern: '(?<![\w-])transition\s*:\s*all\b'
+      include: ["src/**/*.{css,scss,sass,less,jsx,tsx,vue,svelte}"]
+      hint: "Specify individual transition properties like transform or opacity instead of all."
+      examples:
+        bad:
+          - 'transition: all 0.2s ease;'
+          - '  transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1);'
+        good:
+          - 'transition: transform 0.2s ease, opacity 0.2s ease;'
+          - 'transition: color 150ms ease-in-out;'
+verify_checks:
+  - "Enable prefers-reduced-motion in operating system settings and verify animations stop or fade."
+  - "Inspect animation performance in DevTools to ensure zero dropped frames."
+notes: "Transitions on width, height, or margin cause synchronous layout reflows."

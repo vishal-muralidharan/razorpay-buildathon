@@ -1,0 +1,16 @@
+id: browser-checks
+version: 1
+title: Browser Inspection Checks
+applies_when:
+  platforms: [web, pwa]
+  hints: [browser, e2e]
+summary: |
+  Verification checks for interactive browser inspection sessions.
+  Validates console hygiene, theme contrast, memory cleanup, and responsive layout fit.
+rules: []
+verify_checks:
+  - "0 console errors and warnings during user interactions and navigation."
+  - "Contrast in every theme meets readability requirements."
+  - "Listeners and timers clean up on unmount with no memory leaks."
+  - "Content fits without clipping or horizontal overflow at the smallest and largest supported widths."
+notes: "Browser checks are executed through browser capability inspection tools."

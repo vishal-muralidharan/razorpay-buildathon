@@ -1,0 +1,46 @@
+# Legal and settings intake. Copy to .agents/legal-config.yaml.
+# Anything the user has not answered stays as "TODO: ..." or "CONFIRM: ...".
+# The pages show these as visible markers. Never replace a marker with a guess.
+schema_version: 1
+
+product:
+  name: "TODO"                    # the app name shown on the pages
+  operator: "TODO: who runs the service (person or company)"
+  description: "TODO: one sentence, what the app does"
+  paid_features: "CONFIRM: free now, paid later, or paid"
+
+contact:
+  support_email: "TODO: verify support email"
+  grievance_officer:              # needed for India (DPDP). Leave as TODO elsewhere if not needed.
+    name: "TODO: Insert Name"
+    designation: "TODO: Insert Designation"
+    email: "TODO: Insert Email"
+    response_timeframe: "CONFIRM: response timeframe"
+
+jurisdictions: []                 # list of: IN, EU, UK, US-CA, US, OTHER. Ask the user. Do not assume.
+governing_law: "TODO: specify governing law and courts"
+minimum_age: "CONFIRM: minimum age or guardian consent rule"
+
+terms:
+  version: "CONFIRM: version id or last updated date to store with consent"
+  last_updated: "TODO: Insert Last Updated date"
+
+data:
+  retention: "TODO: specify retention period"
+  region: "CONFIRM: data region and any processing outside the user's country"
+  processors: []                  # filled from the audit. Example entries: {name: "...", role: "auth and database"}
+  analytics: "TODO: confirm. none, or name the tool"
+  storage_in_browser: []          # filled from the audit. Example: ["theme preference", "session"]
+  notifications: "CONFIRM: in-app only, or email or push"
+  export_exclude_fields: "CONFIRM: internal fields to leave out of the export"
+
+routes:                           # change if the project already uses other paths
+  settings: /settings
+  rights: /my-data                # the manage-my-data page. For India projects, /dpdp is common
+  privacy: /privacy
+  terms: /terms
+  conditions: /terms-and-conditions
+
+server:
+  delete_function_name: delete-account
+  credentials_env_var: "CONFIRM: environment variable name for the server credentials"

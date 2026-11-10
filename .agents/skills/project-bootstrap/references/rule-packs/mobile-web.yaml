@@ -1,0 +1,45 @@
+id: mobile-web
+version: 1
+title: Mobile Web Usability
+applies_when:
+  platforms: [web, pwa]
+  hints: [mobile, responsive]
+summary: |
+  Optimizations for touch screens and mobile browser viewports.
+  Guarantees readable inputs, accessible touch targets, and unrestricted zoom.
+rules:
+  - id: mobile-input-font-size
+    area: responsive
+    text: "Form inputs must use a font size of at least 16px on touch screens."
+    enforced_by: manual
+
+  - id: mobile-touch-target-size
+    area: responsive
+    text: "Interactive touch targets must be at least 44px by 44px."
+    enforced_by: manual
+
+  - id: mobile-viewport-insets
+    area: responsive
+    text: "Layouts must use safe area insets and dynamic viewport height units."
+    enforced_by: manual
+
+  - id: mobile-no-disabled-zoom
+    area: responsive
+    text: "Never block page zoom using user-scalable=no or maximum-scale=1 in viewport meta tags."
+    enforced_by: test
+    check:
+      type: forbid
+      pattern: 'user-scalable\s*=\s*(?:no|0)|maximum-scale\s*=\s*1(?:\.0)?\b'
+      include: ["**/*.html", "**/*.htm", "src/**/*.{js,jsx,ts,tsx,vue,svelte}"]
+      hint: "Allow viewport scaling so low-vision users can zoom the page."
+      examples:
+        bad:
+          - '<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />'
+          - '<meta name="viewport" content="width=device-width, maximum-scale=1.0" />'
+        good:
+          - '<meta name="viewport" content="width=device-width, initial-scale=1" />'
+          - '<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />'
+verify_checks:
+  - "Inspect input fields on iOS Safari to confirm focusing does not trigger auto-zoom."
+  - "Pinch to zoom on a mobile screen and confirm text scales without horizontal overflow."
+notes: "Safe area insets require viewport-fit=cover in the meta viewport tag."
