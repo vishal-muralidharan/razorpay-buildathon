@@ -1,0 +1,69 @@
+schema_version: 2
+project:
+  name: razorpay-buildathon
+  mode: existing
+  platforms:
+  - web
+  summary: Mandate resurrection engine and dashboard with FastAPI backend and React
+    frontend.
+stack:
+  language: python
+  framework: FastAPI
+  bundler: Vite
+  styling: Tailwind
+  package_manager: pip
+  test_runner: pytest
+  database: SQLite
+design:
+  enabled: false
+responsive:
+  enabled: false
+commands:
+  check: backend/venv/bin/pytest backend/tests
+  test: backend/venv/bin/pytest backend/tests
+structure:
+  layers:
+  - path: backend/app/routers
+    purpose: FastAPI route handlers
+  - path: backend/app
+    purpose: Backend application models, jobs and logic
+  - path: frontend/src
+    purpose: React UI dashboard components and views
+  root_allowed:
+  - FEATURES_AND_TESTING.md
+  tests: colocated
+naming:
+- item: Backend modules
+  style: snake_case
+  example: mock_webhook.py
+git:
+  push: never
+  commit_format: '<type>(<scope>): <subject>'
+  scopes:
+  - name: agents
+    paths:
+    - .agents/**
+    - .github/**
+    - AGENTS.md
+    purpose: Build Forge pipeline and agent configuration
+  - name: backend
+    paths:
+    - backend/**
+    purpose: Python FastAPI engine and database models
+  - name: frontend
+    paths:
+    - frontend/**
+    purpose: React dashboard and charts
+docs:
+  skills_dir: .agents/skills
+  repo_map: README.md
+  agents_file: AGENTS.md
+blueprints:
+  dir: .agents/blueprints
+  enabled: true
+  areas:
+  - ui
+  - data
+  - tokens
+  - layout
+rules: []
