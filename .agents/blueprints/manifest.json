@@ -1,0 +1,28 @@
+{
+  "analyzers": [
+    "auth",
+    "config",
+    "data",
+    "layout",
+    "tokens",
+    "ui"
+  ],
+  "areas": {
+    "config": {
+      "frontend/src/Checkout.jsx": "0490f57eb9314766e898bc8214c4bdaf5d31d7e81671c6033a7a18b6feac8b10",
+      "frontend/src/api.js": "4852d3036c4d4b1267298d5a884258ff79385221b7a25bccf36002b050d74ff9"
+    },
+    "data": {
+      "frontend/src/Schedule.jsx": "e3375acae89c259753dc932dd7cad3ba9baad9ca42ea8b13c00d267041f9f29b"
+    },
+    "layout": {
+      "frontend/index.html": "5c1c8ae8293ad76bed5701c2cdea9af6d5d27dee9bc9e70686f162cbb5f10727"
+    },
+    "tokens": {},
+    "ui": {
+      "frontend/src/Schedule.jsx": "e3375acae89c259753dc932dd7cad3ba9baad9ca42ea8b13c00d267041f9f29b",
+      "frontend/src/components/TransactionTable.jsx": "e113aa3101d10e91211dc8f526816cec28b099311738a0c80833e09563fae0e1"
+    }
+  },
+  "generator_version": "0.2.0"
+}

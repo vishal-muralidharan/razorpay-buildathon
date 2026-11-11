@@ -1,0 +1,41 @@
+id: testing-practices
+version: 1
+title: Testing Practices
+applies_when:
+  platforms: [web, pwa, desktop, api, cli]
+  hints: [test, jest, vitest]
+summary: |
+  Robust component and integration testing patterns.
+  Enforces accessible user-centric queries and resilient behavioral assertions.
+rules:
+  - id: test-query-by-role
+    area: verify
+    text: "Query UI elements using accessible roles or labels instead of CSS class selectors."
+    enforced_by: manual
+
+  - id: test-wait-for-async-ui
+    area: verify
+    text: "Wait for asynchronous UI transitions using findBy queries rather than fixed timers."
+    enforced_by: manual
+
+  - id: test-no-style-assertions
+    area: verify
+    text: "Never assert on class names or styles using toHaveClass or toHaveStyle."
+    enforced_by: test
+    check:
+      type: forbid
+      pattern: '\.(?:toHaveClass|toHaveStyle)\s*\('
+      include: ["**/*.test.*", "**/*.spec.*", "tests/**", "src/test/**"]
+      hint: "Assert on user-visible state or accessibility attributes instead of styles."
+      examples:
+        bad:
+          - 'expect(button).toHaveClass("btn-primary");'
+          - 'expect(card).toHaveStyle({ display: "none" });'
+        good:
+          - 'expect(button).toBeEnabled();'
+          - 'expect(card).not.toBeVisible();'
+          - 'expect(button).toHaveAttribute("aria-pressed", "true");'
+verify_checks:
+  - "Verify test assertions survive visual theme and CSS refactoring without breaking."
+  - "Confirm asynchronous tests do not use arbitrary sleep or timeout delays."
+notes: "Asserting on styling details creates brittle tests that hinder design system updates."

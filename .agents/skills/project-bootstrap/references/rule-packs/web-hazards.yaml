@@ -1,0 +1,101 @@
+id: web-hazards
+version: 1
+title: Web Security and Hygiene
+applies_when:
+  platforms: [web, pwa]
+  hints: [web, node, browser]
+summary: |
+  Block common web security risks and leaked secrets.
+  Prohibits console logging, unsafe links, raw eval, innerHTML, and committed env files.
+rules:
+  - id: web-no-console
+    area: verify
+    text: "Never ship console.log or console.debug calls in production source code."
+    enforced_by: test
+    check:
+      type: forbid
+      pattern: '(?<![\w.$])console\.(?:log|debug)\s*\('
+      include: ["src/**/*.{js,jsx,ts,tsx,vue,svelte,html}"]
+      exclude: ["**/*.test.*", "**/*.spec.*", "src/test/**"]
+      hint: "Remove console.log or console.debug, or use a dedicated logging primitive."
+      examples:
+        bad:
+          - 'console.log("user data:", user);'
+          - 'console.debug("fetching auth state");'
+        good:
+          - 'console.error("failed to initialize:", err);'
+          - 'console.warn("deprecated property accessed");'
+          - 'logger.log("audit event");'
+
+  - id: web-target-blank-rel
+    area: security
+    text: "Links targeting blank must include rel with noopener or noreferrer on the same tag line."
+    enforced_by: test
+    check:
+      type: forbid
+      pattern: '^(?!.*rel=["\x27][^"\x27]*(?:noopener|noreferrer)).*target=["\x27]_blank["\x27]'
+      include: ["src/**/*.{js,jsx,ts,tsx,vue,svelte,html}"]
+      hint: "Add rel=\"noopener\" or rel=\"noopener noreferrer\" to links with target=\"_blank\"."
+      examples:
+        bad:
+          - '<a href="https://example.com" target="_blank">External Link</a>'
+          - "<a target='_blank' href=\"https://example.com\">Documentation</a>"
+        good:
+          - '<a href="https://example.com" target="_blank" rel="noopener">External Link</a>'
+          - '<a href="https://example.com" rel="noopener noreferrer" target="_blank">Documentation</a>'
+          - '<a href="/dashboard" target="_self">Dashboard</a>'
+
+  - id: web-no-raw-eval
+    area: security
+    text: "Never use eval() or equivalent dynamic script execution without a listed exception."
+    enforced_by: test
+    check:
+      type: forbid
+      pattern: '(?<![\w$])(?:window\.)?eval\s*\('
+      include: ["src/**/*.{js,jsx,ts,tsx,vue,svelte,html}"]
+      hint: "Do not use eval(). Parse structured data with JSON.parse or safe dispatch."
+      examples:
+        bad:
+          - 'eval(untrustedInput);'
+          - 'window.eval("calculate()");'
+        good:
+          - 'JSON.parse(untrustedInput);'
+          - 'calculateValue(payload);'
+
+  - id: web-no-inner-html
+    area: security
+    text: "Never assign to innerHTML or use dangerouslySetInnerHTML without a listed exception."
+    enforced_by: test
+    check:
+      type: forbid
+      pattern: '(?<![\w$])(?:innerHTML\s*=|dangerouslySetInnerHTML\b)'
+      include: ["src/**/*.{js,jsx,ts,tsx,vue,svelte,html}"]
+      hint: "Do not inject raw HTML. Use textContent or sanitized framework primitives."
+      examples:
+        bad:
+          - 'container.innerHTML = renderedSnippet;'
+          - '<div dangerouslySetInnerHTML={{ __html: rawHtml }} />'
+        good:
+          - 'container.textContent = textValue;'
+          - '<div className="content">{textValue}</div>'
+
+  - id: web-no-committed-env
+    area: security
+    text: "Never commit .env files containing local configurations or secrets."
+    enforced_by: test
+    check:
+      type: forbid_file
+      include: [".env", ".env.local", ".env.*.local", "**/.env", "**/.env.local"]
+      exclude: [".env.example", ".env.template", "**/.env.example", "**/.env.template"]
+      hint: "Never commit .env files with secrets or local config. Add .env to .gitignore and commit .env.example."
+      examples:
+        bad:
+          - '.env'
+          - 'apps/web/.env.local'
+        good:
+          - '.env.example'
+          - 'apps/web/.env.template'
+verify_checks:
+  - "Confirm external links open in a new tab without access to window.opener."
+  - "Confirm environment variables are injected through pipeline secrets rather than committed files."
+notes: "Multi-line tags where rel is on a separate line are not matched by the single-line target-blank check."

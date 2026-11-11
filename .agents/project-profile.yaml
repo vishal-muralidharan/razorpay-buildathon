@@ -1,0 +1,172 @@
+schema_version: 2
+project:
+  name: razorpay-buildathon
+  mode: existing
+  platforms:
+  - web
+  summary: Mandate resurrection engine and dashboard with FastAPI backend and React
+    frontend.
+stack:
+  language: python
+  framework: FastAPI
+  bundler: Vite
+  styling: Tailwind
+  package_manager: pip
+  test_runner: pytest
+  database: SQLite
+design:
+  enabled: false
+responsive:
+  enabled: false
+commands:
+  check: backend/venv/bin/pytest backend/tests
+  test: backend/venv/bin/pytest backend/tests
+structure:
+  layers:
+  - path: backend/app/routers
+    purpose: FastAPI route handlers
+  - path: backend/app
+    purpose: Backend application models, jobs and logic
+  - path: frontend/src
+    purpose: React UI dashboard components and views
+  root_allowed:
+  - FEATURES_AND_TESTING.md
+  tests: colocated
+naming:
+- item: Backend modules
+  style: snake_case
+  example: mock_webhook.py
+git:
+  push: never
+  commit_format: '<type>(<scope>): <subject>'
+  scopes:
+  - name: agents
+    paths:
+    - .agents/**
+    - .github/**
+    - AGENTS.md
+    purpose: Build Forge pipeline and agent configuration
+  - name: backend
+    paths:
+    - backend/**
+    purpose: Python FastAPI engine and database models
+  - name: frontend
+    paths:
+    - frontend/**
+    purpose: React dashboard and charts
+docs:
+  skills_dir: .agents/skills
+  repo_map: README.md
+  agents_file: AGENTS.md
+blueprints:
+  dir: .agents/blueprints
+  enabled: true
+  areas:
+  - ui
+  - data
+  - tokens
+  - layout
+rules:
+- id: a11y-semantic-html
+  area: design
+  text: Use semantic HTML elements instead of generic divs with click handlers.
+  enforced_by: manual
+  pack: a11y-basics@1
+- id: a11y-visible-focus
+  area: design
+  text: Interactive elements must display high-contrast visible focus indicators.
+  enforced_by: manual
+  pack: a11y-basics@1
+- id: a11y-aa-contrast
+  area: design
+  text: Text and interactive controls must meet WCAG AA contrast standards.
+  enforced_by: manual
+  pack: a11y-basics@1
+- id: a11y-icon-button-labels
+  area: design
+  text: Icon-only controls must provide an accessible text label.
+  enforced_by: manual
+  pack: a11y-basics@1
+- id: a11y-img-has-alt
+  area: design
+  text: Image tags must include an alt attribute on the same tag line.
+  enforced_by: test
+  check:
+    type: forbid
+    pattern: <img\b(?![^>]*\balt\s*=)[^>]*>
+    include:
+    - '**/*.html'
+    - '**/*.htm'
+    - src/**/*.{jsx,tsx,vue,svelte,html}
+    hint: Add an alt attribute to the img tag. Use alt="" for decorative images.
+    examples:
+      bad:
+      - <img src="/hero.png">
+      - <img src="avatar.jpg" className="avatar" />
+      good:
+      - <img src="/hero.png" alt="Company logo" />
+      - <img src="decoration.svg" alt="" />
+      - <Image src="/hero.png" />
+  pack: a11y-basics@1
+- id: motion-respect-reduced
+  area: motion
+  text: Transitions and animations must respect prefers-reduced-motion media queries.
+  enforced_by: manual
+  pack: motion-basics@1
+- id: motion-transform-opacity-only
+  area: motion
+  text: Smooth animations must target transform and opacity properties only.
+  enforced_by: manual
+  pack: motion-basics@1
+- id: motion-no-transition-all
+  area: motion
+  text: 'Never use transition: all in stylesheets; target explicit CSS properties
+    instead.'
+  enforced_by: test
+  check:
+    type: forbid
+    pattern: (?<![\w-])transition\s*:\s*all\b
+    include:
+    - src/**/*.{css,scss,sass,less,jsx,tsx,vue,svelte}
+    hint: Specify individual transition properties like transform or opacity instead
+      of all.
+    examples:
+      bad:
+      - 'transition: all 0.2s ease;'
+      - '  transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1);'
+      good:
+      - 'transition: transform 0.2s ease, opacity 0.2s ease;'
+      - 'transition: color 150ms ease-in-out;'
+  pack: motion-basics@1
+- id: ui-state-loading-skeleton
+  area: design
+  text: Loading views must use skeleton blocks matching content shape with no layout
+    shift.
+  enforced_by: manual
+  pack: ui-states@1
+- id: ui-state-empty-action
+  area: design
+  text: Empty states must display an icon, 1 or 2 descriptive words, and an action.
+  enforced_by: manual
+  pack: ui-states@1
+- id: ui-state-error-alert
+  area: design
+  text: Error views must display a short message with an icon and role="alert".
+  enforced_by: manual
+  pack: ui-states@1
+quality_gates:
+- Navigate through the entire interface using only the Tab and Shift+Tab keys.
+- Inspect focus outlines in high contrast mode.
+- Enable prefers-reduced-motion in operating system settings and verify animations
+  stop or fade.
+- Inspect animation performance in DevTools to ensure zero dropped frames.
+- Simulate slow network and verify skeleton dimensions match loaded content.
+- Trigger an empty collection and verify the primary creation button is visible.
+- Trigger an API failure and confirm the error banner announces via screen readers.
+rule_packs:
+- id: a11y-basics
+  version: 1
+- id: motion-basics
+  version: 1
+- id: ui-states
+  version: 1

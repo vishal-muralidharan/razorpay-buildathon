@@ -1,0 +1,38 @@
+id: shortcuts
+version: 1
+title: Keyboard Shortcuts
+applies_when:
+  platforms: [web, desktop]
+  hints: [keyboard, shortcuts]
+summary: |
+  Predictable keyboard shortcuts across operating systems.
+  Prevents collisions with native browser hotkeys and typing in inputs.
+rules:
+  - id: kbd-meta-ctrl-modifiers
+    area: process
+    text: "Keyboard shortcut handlers must check metaKey on macOS and ctrlKey elsewhere."
+    enforced_by: manual
+
+  - id: kbd-option-chords-code
+    area: process
+    text: "Option key chords must be verified using event.code rather than event.key."
+    enforced_by: manual
+
+  - id: kbd-delete-backspace
+    area: process
+    text: "Destructive shortcut actions must support both Delete and Backspace keys."
+    enforced_by: manual
+
+  - id: kbd-platform-hints
+    area: design
+    text: "Shortcut tooltips and labels must display platform-appropriate modifier keys."
+    enforced_by: manual
+
+  - id: kbd-ignore-in-inputs
+    area: process
+    text: "Global keyboard shortcuts must be ignored while typing inside form inputs."
+    enforced_by: manual
+verify_checks:
+  - "Type in an input field and confirm single-key shortcuts do not fire."
+  - "Test modifier shortcuts on both macOS and non-macOS environments."
+notes: "Use event.code for layout-independent physical key bindings."

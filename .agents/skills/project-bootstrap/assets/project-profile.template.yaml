@@ -1,0 +1,138 @@
+# Project profile. The single source of truth for the build pipeline.
+# Every pipeline skill reads this file first. Edit it, then re-render:
+#   python3 .agents/skills/project-bootstrap/scripts/render.py --profile .agents/project-profile.yaml
+# Fields marked "TODO" are unresolved. The validator flags them.
+schema_version: 1
+
+project:
+  name: "TODO"
+  summary: "TODO one sentence"
+  mode: existing            # existing | new
+  platforms: [web]          # web, pwa, desktop, ios, android, cli, api
+
+stack:                      # use "none" when a slot does not apply
+  language: "TODO"
+  framework: "TODO"
+  bundler: none
+  styling: none
+  router: none
+  state: none
+  package_manager: "TODO"
+  test_runner: none
+  linter: none
+  backend: none
+  auth: none
+  database: none
+  hosting: none
+
+commands:                   # exact shell commands. Empty string means not available.
+  install: ""
+  dev: ""
+  lint: ""
+  test: ""
+  build: ""
+  check: ""                 # ONE command that runs lint, test and build
+  test_single: ""           # use {path} as the placeholder
+  deploy: ""                # optional. Leave empty to skip deployment
+
+structure:
+  layers:                   # one entry per source folder that has a role
+    - path: "TODO"
+      purpose: "TODO"
+  root_allowed: []          # files and folders allowed in the repo root
+  tests: colocated          # colocated | tests-dir
+
+naming:                     # one entry per kind of file or identifier
+  - item: "TODO"
+    style: "TODO"
+    example: "TODO"
+
+design:
+  enabled: false
+  tokens_file: ""
+  component_dirs: []
+  enforced_by: ""           # test file or lint rule that checks design rules
+
+responsive:
+  enabled: false
+  min_width: 320
+  max_width: 2560
+  touch_target_px: 44
+  breakpoints: []           # list of {from: 768, layout: "icon rail"}
+
+data:
+  storage: ""               # for example: localStorage, IndexedDB, Postgres, Firestore
+  schema_source: ""         # path to the schema, types or migration folder
+  invariants: []            # rules the data model must always satisfy
+  protected: []             # things that need user approval before they change
+
+git:
+  commit_format: "<type>(<scope>): <subject>"
+  single_line: true
+  types: [feat, fix, refactor, style, test, docs, chore]
+  scopes: []                # list of strings or {name, purpose, paths} objects. Empty means free scope
+  push: never               # never | ask | allowed
+  stage: granular           # granular | all
+  workflow:                 # opt-in branch workflow
+    default_branch: main
+    mode: ask               # off | ask | always
+    branch_format: "<type>/<slug>"
+    sync: merge             # merge | rebase
+    merge_method: squash    # squash | merge | rebase
+    remote: origin
+    cleanup: ask            # ask | keep
+    worktree: false
+
+verification:
+  zero_warnings: true
+  browser_checks: []        # plain sentences. Used only if a browser capability exists
+  post_build_report: true   # end every task with open questions and known issues
+
+capabilities:               # optional helpers. A disabled slot is skipped by the pipeline.
+  deploy:
+    enabled: false
+    command: ""
+    verify_url: ""
+    on_failure: report      # report | self-heal
+    max_attempts: 3         # self-heal stops after this many tries
+    reference: ""           # name of an entry in .agents/references.yaml
+  browser_inspection:
+    enabled: false
+    reference: ""           # name of an entry in .agents/references.yaml
+  backend:
+    enabled: false
+    reference: ""           # name of an entry in .agents/references.yaml
+  security_review:
+    enabled: false
+    reference: ""           # name of an entry in .agents/references.yaml
+
+# Third party skills and external references are managed in .agents/references.yaml.
+# Use extend-pipeline to add and vet references:
+#   python3 .agents/skills/extend-pipeline/scripts/refs.py add --help
+#    path: ""               # set when installed, relative to the repo root
+
+rules:                      # write each rule ONCE, here
+  # Rule packs available: native-controls, web-hazards, ui-states, mobile-web, shortcuts, a11y-basics, motion-basics, testing-practices, browser-checks
+  - id: "example-rule"
+    area: design            # design, tokens, motion, responsive, structure, naming, data, security, verify, git, docs, process
+    text: "One sentence. Imperative."
+    enforced_by: manual     # manual | test | lint
+    # pack: "native-controls@1" # optional: records which pack and version supplied this rule
+    # optional machine check, run by rules-to-tests. Types: forbid, require_file, forbid_file, root_only
+    # check: {type: forbid, pattern: '#[0-9a-fA-F]{3,8}\b', include: ["src/**/*.css"], exclude: ["src/index.css"], hint: "Use tokens", examples: {bad: ["#fff"], good: ["var(--bg)"]}}
+    # exceptions: [{path: "src/legacy/button.css", reason: "Migration in progress"}]
+
+# Installed rule packs:
+# rule_packs:
+#   - id: native-controls
+#     version: 1
+
+# Pack rule IDs permanently dropped by the user:
+# dropped_pack_rules: []
+
+docs:
+  readme: README.md
+  agents_file: AGENTS.md
+  skills_dir: .agents/skills
+  repo_map: .agents/repo-map.md
+  spec: ""                 # optional. Path to the product spec, for example docs/product-spec.md

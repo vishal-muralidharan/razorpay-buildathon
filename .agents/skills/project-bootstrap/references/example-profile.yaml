@@ -1,0 +1,135 @@
+# EXAMPLE ONLY. Every value here is invented. Never copy values from this file into a real profile.
+#
+# Pocketlog is a fictional personal journaling and habit tracking app.
+schema_version: 1
+
+project:
+  name: Pocketlog
+  summary: Fast, offline-first personal journaling and habit tracking application.
+  mode: existing
+  platforms: [web, mobile]
+
+stack:
+  language: typescript
+  framework: React 19
+  bundler: Vite
+  styling: Tailwind v4
+  router: none
+  state: React context
+  package_manager: npm
+  test_runner: Vitest
+  linter: Oxlint
+  backend: SQLite (local storage)
+  auth: none
+  database: SQLite
+  hosting: static
+
+commands:
+  install: npm install
+  dev: npm run dev
+  lint: npm run lint
+  test: npm test
+  build: npm run build
+  check: npm run check
+  test_single: npx vitest run {path}
+  deploy: npm run deploy
+
+structure:
+  layers:
+    - path: src/components/ui
+      purpose: primitive controls with no business logic
+    - path: src/components/views
+      purpose: top level screen and sheet containers
+    - path: src/components/journal
+      purpose: journal entry editor and timeline components
+    - path: src/context
+      purpose: state providers for journal entries and settings
+    - path: src/hooks
+      purpose: reusable react hooks for storage access
+    - path: src/lib/storage
+      purpose: local sqlite database interface and schema
+    - path: src/lib/format
+      purpose: date formatting and string helpers
+    - path: src/types
+      purpose: typescript interfaces for entries and preferences
+  root_allowed: [src/, package.json, package-lock.json, index.html, vite.config.ts, tsconfig.json, README.md, AGENTS.md, public/, .agents/]
+  tests: colocated
+
+naming:
+  - {item: "React component, screen or provider", style: PascalCase.tsx, example: JournalEntry.tsx}
+  - {item: Hook, style: camelCase.ts starting with use, example: useJournal.ts}
+  - {item: "Helper, util or lib", style: camelCase.ts, example: formatDate.ts}
+  - {item: Test, style: same name plus .test, example: JournalEntry.test.tsx}
+  - {item: Folder, style: lowercase, example: components/ui}
+  - {item: Element id or test id, style: kebab-case, example: btn-save-entry}
+  - {item: CSS variable, style: "--kebab-case", example: --surface-primary}
+
+design:
+  enabled: true
+  tokens_file: src/tokens.css
+  component_dirs: [src/components/ui]
+  enforced_by: src/design-rules.test.ts
+
+responsive:
+  enabled: true
+  min_width: 320
+  max_width: 1920
+  touch_target_px: 44
+  breakpoints:
+    - {from: 320, layout: "single column, bottom navigation bar"}
+    - {from: 768, layout: "split master-detail pane, compact sidebar"}
+    - {from: 1024, layout: "expanded three-column workspace"}
+
+data:
+  storage: SQLite with encrypted local storage
+  schema_source: src/lib/storage/schema.sql
+  invariants:
+    - Every journal entry contains a non-negative created_at epoch timestamp.
+    - Tag strings are trimmed, lowercase alphanumeric, and unique per entry.
+  protected:
+    - Storage keys
+    - Journal entry schema
+    - SQLite migration sequence
+
+git:
+  push: ask
+  commit_format: "<type>(<scope>): <subject>"
+  single_line: true
+  workflow:
+    default_branch: main
+    mode: ask
+    branch_format: "<type>/<slug>"
+    sync: merge
+    merge_method: squash
+    remote: origin
+    cleanup: ask
+    worktree: false
+  scopes:
+    - name: entry
+      purpose: Journal entry operations and user inputs
+      paths:
+        - src/components/journal/**
+    - name: journal
+      purpose: Journal timeline and feed display
+      paths:
+        - src/components/journal/**
+    - name: ui
+      purpose: Core design primitives and styling
+      paths:
+        - src/components/ui/**
+        - src/tokens.css
+    - name: storage
+      purpose: SQLite database migrations and local persistence
+      paths:
+        - src/lib/storage/**
+    - name: config
+      purpose: Build tools, linters, and package configuration
+      paths:
+        - "*.json"
+        - "*.ts"
+
+docs:
+  readme: README.md
+  agents_file: AGENTS.md
+  skills_dir: .agents/skills
+  repo_map: .agents/repo-map.md

@@ -1,0 +1,29 @@
+id: ui-states
+version: 1
+title: UI State Management
+applies_when:
+  platforms: [web, pwa, desktop, mobile]
+  hints: [ui, react, vue, svelte]
+summary: |
+  Consistent presentation for loading, empty, and error conditions.
+  Eliminates layout shifts and ensures clear recovery actions across all views.
+rules:
+  - id: ui-state-loading-skeleton
+    area: design
+    text: "Loading views must use skeleton blocks matching content shape with no layout shift."
+    enforced_by: manual
+
+  - id: ui-state-empty-action
+    area: design
+    text: "Empty states must display an icon, 1 or 2 descriptive words, and an action."
+    enforced_by: manual
+
+  - id: ui-state-error-alert
+    area: design
+    text: "Error views must display a short message with an icon and role=\"alert\"."
+    enforced_by: manual
+verify_checks:
+  - "Simulate slow network and verify skeleton dimensions match loaded content."
+  - "Trigger an empty collection and verify the primary creation button is visible."
+  - "Trigger an API failure and confirm the error banner announces via screen readers."
+notes: "Verify checks are evaluated manually or via automated end-to-end assertions."

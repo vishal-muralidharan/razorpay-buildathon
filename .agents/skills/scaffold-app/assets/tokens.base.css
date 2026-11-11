@@ -1,0 +1,105 @@
+/*
+  Base design tokens. A neutral starter, not a finished design.
+  Copy this file to the profile's design.tokens_file, then adapt it to the
+  design rules in the profile. This file is the only place raw color values
+  are allowed. Components must read tokens, never raw values.
+*/
+
+:root {
+  /* Surfaces and text. Dark is the default. */
+  --bg: #000000;
+  --surface: #0a0a0a;
+  --surface-2: #121212;
+  --surface-3: #1a1a1a;
+  --line: #262626;
+  --line-strong: #525252;
+  --fg: #ffffff;
+  --fg-muted: #a3a3a3;
+  --fg-faint: #8c8c8c;
+  --action: #ffffff;
+  --on-action: #000000;
+
+  /* Space: 4 and 8 px steps */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+
+  /* Shape */
+  --radius-sm: 8px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+  --radius-full: 9999px;
+
+  /* Motion */
+  --dur-fast: 150ms;
+  --dur-base: 200ms;
+  --dur-slow: 300ms;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+
+  /* Type */
+  --font-body: system-ui, sans-serif;
+  --font-display: system-ui, sans-serif;
+  --text-label: 0.75rem;
+  --text-body: 0.875rem;
+  --text-title: clamp(1.125rem, 1rem + 0.6vw, 1.5rem);
+
+  color-scheme: dark;
+}
+
+/* Light mode by system preference, unless the app forces a theme. */
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    --bg: #ffffff;
+    --surface: #fafafa;
+    --surface-2: #f5f5f5;
+    --surface-3: #e5e5e5;
+    --line: #e5e5e5;
+    --line-strong: #737373;
+    --fg: #000000;
+    --fg-muted: #525252;
+    --fg-faint: #737373;
+    --action: #000000;
+    --on-action: #ffffff;
+    color-scheme: light;
+  }
+}
+
+/* Forced light theme. */
+:root[data-theme="light"] {
+  --bg: #ffffff;
+  --surface: #fafafa;
+  --surface-2: #f5f5f5;
+  --surface-3: #e5e5e5;
+  --line: #e5e5e5;
+  --line-strong: #737373;
+  --fg: #000000;
+  --fg-muted: #525252;
+  --fg-faint: #737373;
+  --action: #000000;
+  --on-action: #ffffff;
+  color-scheme: light;
+}
+
+/* Respect reduced motion. */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur-fast: 0ms;
+    --dur-base: 0ms;
+    --dur-slow: 0ms;
+  }
+}
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-body);
+}
+
+:focus-visible {
+  outline: 2px solid var(--fg);
+  outline-offset: 2px;
+}
