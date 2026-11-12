@@ -14,6 +14,7 @@ Commands:
 import argparse
 import difflib
 import fnmatch
+import functools
 import hashlib
 import json
 import os
@@ -49,6 +50,8 @@ SCRIPT_EXTENSIONS = {
 TEST_DIR_NAMES = {"test", "tests", "__tests__", "fixtures"}
 GENERATOR_BANNER_SNIPPET = "by project-bootstrap"
 GENERATOR_STAMP_MARKER = "<!-- build-forge:generated"
+# Text that `build-forge link` writes into CLAUDE.md, GEMINI.md and other pointer files.
+LINK_POINTER_TEXT = "Read AGENTS.md first and follow it. If AGENTS.md does not exist yet, run the project-bootstrap skill at .agents/skills/project-bootstrap/SKILL.md."
 
 # Documented threshold for matching an existing profile rule:
 # Token overlap (Jaccard similarity of lowercase word tokens) >= 0.50 AND
@@ -78,23 +81,52 @@ def word_tokens(text: str) -> set:
     return set(normalize_text(text).split())
 
 
-def similarity_score(t1: str, t2: str) -> tuple:
-    s1 = normalize_text(t1)
-    s2 = normalize_text(t2)
+@functools.lru_cache(maxsize=None)
+def _normalized(text: str) -> tuple:
+    """Return the normalized text and its token set. Cached because each statement is compared many times."""
+    s = normalize_text(text)
+    return s, frozenset(s.split())
+
+
+def similarity_score(t1: str, t2: str, min_ratio: float = 0.0) -> tuple:
+    """Return (token overlap, difflib ratio).
+
+    When min_ratio is set and a cheap upper bound of the ratio is already below it,
+    the bound is returned instead of the exact ratio. Callers that only compare the
+    ratio against thresholds at or above min_ratio get the same decision, faster.
+    """
+    s1, tokens1 = _normalized(t1)
+    s2, tokens2 = _normalized(t2)
     if not s1 or not s2:
         return 0.0, 0.0
-    tokens1 = set(s1.split())
-    tokens2 = set(s2.split())
     overlap = len(tokens1 & tokens2) / max(1, len(tokens1 | tokens2))
-    ratio = difflib.SequenceMatcher(None, s1, s2).ratio()
-    return overlap, ratio
+    matcher = difflib.SequenceMatcher(None, s1, s2)
+    if min_ratio > 0:
+        bound = matcher.real_quick_ratio()
+        if bound < min_ratio:
+            return overlap, bound
+        bound = matcher.quick_ratio()
+        if bound < min_ratio:
+            return overlap, bound
+    return overlap, matcher.ratio()
+
+
+def is_similar(t1: str, t2: str, overlap_min: float, ratio_with_overlap: float, ratio_alone: float) -> bool:
+    """True when (overlap >= overlap_min and ratio >= ratio_with_overlap) or ratio >= ratio_alone."""
+    s1, tokens1 = _normalized(t1)
+    s2, tokens2 = _normalized(t2)
+    if not s1 or not s2:
+        return False
+    overlap = len(tokens1 & tokens2) / max(1, len(tokens1 | tokens2))
+    needed = min(ratio_with_overlap, ratio_alone) if overlap >= overlap_min else ratio_alone
+    _, ratio = similarity_score(t1, t2, min_ratio=needed)
+    return (overlap >= overlap_min and ratio >= ratio_with_overlap) or ratio >= ratio_alone
 
 
 def is_covered_by_rule(text: str, profile_rules: list) -> tuple:
     for r in profile_rules:
         r_text = r.get("text", "")
-        overlap, ratio = similarity_score(text, r_text)
-        if (overlap >= SIMILARITY_TOKEN_OVERLAP_MIN and ratio >= SIMILARITY_DIFFLIB_MIN) or ratio >= SIMILARITY_DIFFLIB_DIRECT:
+        if is_similar(text, r_text, SIMILARITY_TOKEN_OVERLAP_MIN, SIMILARITY_DIFFLIB_MIN, SIMILARITY_DIFFLIB_DIRECT):
             return True, r.get("id", "rule")
     return False, ""
 
@@ -145,8 +177,11 @@ def is_generated_file(p: Path) -> bool:
     if p.name == "AGENTS.generated.md":
         return True
     try:
-        head = p.read_text(encoding="utf-8", errors="ignore")[:400]
+        text = p.read_text(encoding="utf-8", errors="ignore")
+        head = text[:400]
         if GENERATOR_BANNER_SNIPPET in head or GENERATOR_STAMP_MARKER in head:
+            return True
+        if text.strip() == LINK_POINTER_TEXT:
             return True
     except Exception:
         pass
@@ -332,7 +367,7 @@ def find_and_classify_sources(root: Path, include_skipped: bool = False):
         return len(split_statements(p, root))
 
     # 1. Root agent files
-    for name in ("AGENTS.md", "CLAUDE.md", ".cursorrules", "INSTRUCTIONS.md", ".windsurfrules", ".clinerules"):
+    for name in ("AGENTS.md", "CLAUDE.md", "GEMINI.md", ".cursorrules", "INSTRUCTIONS.md", ".windsurfrules", ".clinerules"):
         p = root / name
         if p.is_file():
             if is_generated_file(p):
@@ -350,8 +385,16 @@ def find_and_classify_sources(root: Path, include_skipped: bool = False):
 
     gh_copilot = root / ".github" / "copilot-instructions.md"
     if gh_copilot.is_file():
-        active_files.append((gh_copilot, "local", "GitHub Copilot instructions"))
-        source_counts["local"] += count_stmts(gh_copilot)
+        if is_generated_file(gh_copilot):
+            cnt = count_stmts(gh_copilot)
+            source_counts["generated"] += cnt
+            skipped_sources.append({
+                "path": ".github/copilot-instructions.md", "class": "generated",
+                "reason": "Pointer file made by link", "count": cnt
+            })
+        else:
+            active_files.append((gh_copilot, "local", "GitHub Copilot instructions"))
+            source_counts["local"] += count_stmts(gh_copilot)
 
     # 2. .cursor/rules
     cursor_rules = root / ".cursor" / "rules"
@@ -363,17 +406,44 @@ def find_and_classify_sources(root: Path, include_skipped: bool = False):
                     source_counts["local"] += count_stmts(p)
 
     # 3. .claude/skills
+    # The link command points .claude/skills (or each skill inside it) at .agents/skills,
+    # or copies the skills when symlinks are not available. Those are Build Forge files, not user rules.
     claude_skills = root / ".claude" / "skills"
+    agents_skills = root / ".agents" / "skills"
+    agents_skills_resolved = agents_skills.resolve()
+
+    def points_into_agents_skills(p: Path) -> bool:
+        try:
+            p.resolve().relative_to(agents_skills_resolved)
+            return True
+        except ValueError:
+            return False
+
+    def record_link(path_label: str, files_root: Path, reason: str) -> None:
+        cnt = 0
+        for fp in sorted(files_root.rglob("*")):
+            if fp.is_file() and fp.suffix.lower() in (".md", ".txt") and not should_ignore_file(fp, files_root):
+                cnt += count_stmts(fp)
+        source_counts["build-forge"] += cnt
+        skipped_sources.append({"path": path_label, "class": "build-forge", "reason": reason, "count": cnt})
+
     if claude_skills.is_dir():
-        for item in sorted(claude_skills.iterdir()):
-            if item.is_symlink():
-                continue
-            if item.is_dir():
-                for p in sorted(item.rglob("*")):
-                    if p.is_file() and p.suffix.lower() in (".md", ".txt"):
-                        if not should_ignore_file(p, item):
-                            active_files.append((p, "local", "Claude skill"))
-                            source_counts["local"] += count_stmts(p)
+        if claude_skills.is_symlink() or points_into_agents_skills(claude_skills):
+            record_link(".claude/skills", claude_skills, "Agent link to .agents/skills")
+        else:
+            for item in sorted(claude_skills.iterdir()):
+                if item.is_symlink():
+                    continue
+                if item.is_dir():
+                    twin = agents_skills / item.name
+                    if twin.is_dir() and compute_dir_hashes(item) == compute_dir_hashes(twin):
+                        record_link(f".claude/skills/{item.name}", item, "Copy of .agents/skills made by link")
+                        continue
+                    for p in sorted(item.rglob("*")):
+                        if p.is_file() and p.suffix.lower() in (".md", ".txt"):
+                            if not should_ignore_file(p, item):
+                                active_files.append((p, "local", "Claude skill"))
+                                source_counts["local"] += count_stmts(p)
 
     # 4. .agents/vendor (always reference, never legacy source)
     vendor_dir = root / ".agents" / "vendor"
@@ -730,8 +800,7 @@ def classify_statement(stmt: dict, seen_statements: list, profile_rules: list, b
 
     # 1. Check duplicate against seen statements
     for prev in seen_statements:
-        ov, rat = similarity_score(text, prev["text"])
-        if (ov >= 0.85 and rat >= 0.85) or rat >= 0.90:
+        if is_similar(text, prev["text"], 0.85, 0.85, 0.90):
             return {
                 "class": "duplicate",
                 "proposed_destination": f"duplicate of {prev['id']}",
@@ -940,8 +1009,7 @@ def read_ledger_decision_sources(ledger_path: Path) -> list:
     return decision_sources
 
 
-def write_ledger(ledger_path: Path, statements: list, skipped_sources: list = None, decision_sources: list = None, source_counts: dict = None):
-    ledger_path.parent.mkdir(parents=True, exist_ok=True)
+def format_ledger(statements: list, skipped_sources: list = None, decision_sources: list = None, source_counts: dict = None, existing_content: str = "") -> str:
     cov_pct, cov_count, rel_count = calculate_coverage(statements)
 
     counts_status = {"pending": 0, "covered": 0, "accepted": 0, "dropped": 0, "routed": 0}
@@ -956,13 +1024,6 @@ def write_ledger(ledger_path: Path, statements: list, skipped_sources: list = No
         counts_status[st] = counts_status.get(st, 0) + 1
         cl = s.get("class", "note")
         counts_class[cl] = counts_class.get(cl, 0) + 1
-
-    existing_content = ""
-    if ledger_path.is_file():
-        try:
-            existing_content = ledger_path.read_text(encoding="utf-8", errors="ignore")
-        except Exception:
-            pass
 
     lines = [
         "# Legacy Parity Ledger",
@@ -1065,7 +1126,19 @@ def write_ledger(ledger_path: Path, statements: list, skipped_sources: list = No
         row = f"| {s['id']} | {s['file']}:{s['line']} | {s['class']} | {s['proposed_destination']} | {s['status']} | {escape_table_cell(details)} | {source_class} |"
         lines.append(row)
 
-    write_text_lf(ledger_path, "\n".join(lines) + "\n")
+    return "\n".join(lines) + "\n"
+
+
+def write_ledger(ledger_path: Path, statements: list, skipped_sources: list = None, decision_sources: list = None, source_counts: dict = None):
+    ledger_path.parent.mkdir(parents=True, exist_ok=True)
+    existing_content = ""
+    if ledger_path.is_file():
+        try:
+            existing_content = ledger_path.read_text(encoding="utf-8", errors="ignore")
+        except Exception:
+            pass
+    content = format_ledger(statements, skipped_sources, decision_sources, source_counts, existing_content)
+    write_text_lf(ledger_path, content)
 
 
 def read_ledger(ledger_path: Path) -> list:
@@ -1121,7 +1194,7 @@ def read_ledger(ledger_path: Path) -> list:
     return statements
 
 
-def cmd_inventory(root: Path, include_skipped: bool = False):
+def collect_inventory_statements(root: Path, include_skipped: bool = False):
     active_files, skipped_sources, decision_sources, source_counts = find_and_classify_sources(root, include_skipped=include_skipped)
     profile_data, profile_rules = load_profile_rules(root)
     blueprints = load_blueprints(root)
@@ -1155,14 +1228,35 @@ def cmd_inventory(root: Path, include_skipped: bool = False):
         })
         counter += 1
 
+    return classified_statements, active_files, skipped_sources, decision_sources, source_counts
+
+
+def cmd_inventory(root: Path, include_skipped: bool = False, write: bool = False):
+    classified_statements, active_files, skipped_sources, decision_sources, source_counts = collect_inventory_statements(
+        root, include_skipped=include_skipped
+    )
+
     ledger_path = root / ".agents" / "legacy-parity.md"
-    write_ledger(
-        ledger_path,
+    existing_content = ""
+    if ledger_path.is_file():
+        try:
+            existing_content = ledger_path.read_text(encoding="utf-8", errors="ignore")
+        except Exception:
+            pass
+
+    ledger_text = format_ledger(
         classified_statements,
         skipped_sources=skipped_sources,
         decision_sources=decision_sources,
-        source_counts=source_counts
+        source_counts=source_counts,
+        existing_content=existing_content
     )
+
+    if write:
+        ledger_path.parent.mkdir(parents=True, exist_ok=True)
+        write_text_lf(ledger_path, ledger_text)
+    else:
+        print(ledger_text)
 
     cov_pct, cov_count, rel_count = calculate_coverage(classified_statements)
     counts_class = {}
@@ -1182,7 +1276,8 @@ def cmd_inventory(root: Path, include_skipped: bool = False):
         for ds in decision_sources:
             print(f"  - {ds['path']} ({ds['class']}): {ds['signals']}")
             print(f"    Proposed action: {ds['proposed_action']}")
-    print(f"\nLedger written to {ledger_path.relative_to(root).as_posix()}.")
+    if write:
+        print(f"\nLedger written to {ledger_path.relative_to(root).as_posix()}.")
 
 
 def resolve_blueprint_area_for_statement(stmt: dict) -> str:
@@ -1305,10 +1400,11 @@ def route_statement_to_blueprint(root: Path, stmt: dict):
 
 def cmd_batch(root: Path, area: str, limit: int):
     ledger_path = root / ".agents" / "legacy-parity.md"
-    if not ledger_path.is_file():
-        sys.exit("Error: .agents/legacy-parity.md does not exist. Run inventory first.")
+    if ledger_path.is_file():
+        statements = read_ledger(ledger_path)
+    else:
+        statements, _, _, _, _ = collect_inventory_statements(root)
 
-    statements = read_ledger(ledger_path)
     target_area = area.lower().strip()
 
     pending = []
@@ -1480,12 +1576,16 @@ def cmd_apply(root: Path, accept_ids: list, drop_ids: list, route_ids: list, rou
     print(f"Coverage is now {cov_pct}% ({cov_count}/{rel_count} rule-candidate and derivable statements covered or accepted).")
 
 
-def cmd_status(root: Path):
+def cmd_status(root: Path, write: bool = False):
     ledger_path = root / ".agents" / "legacy-parity.md"
-    if not ledger_path.is_file():
-        sys.exit("Error: .agents/legacy-parity.md does not exist. Run inventory first.")
-
-    statements = read_ledger(ledger_path)
+    decision_sources = []
+    skipped_sources = []
+    source_counts = {}
+    if ledger_path.is_file():
+        statements = read_ledger(ledger_path)
+        decision_sources = read_ledger_decision_sources(ledger_path)
+    else:
+        statements, active_files, skipped_sources, decision_sources, source_counts = collect_inventory_statements(root)
 
     # Re-check pending derivable statements against blueprints if present
     blueprints = load_blueprints(root)
@@ -1527,8 +1627,15 @@ def cmd_status(root: Path):
                             s["reason"] = f"matched blueprint ui component {cm}"
                             updated = True
                             break
-        if updated:
+        if updated and write:
             write_ledger(ledger_path, statements)
+
+    if write and not ledger_path.is_file():
+        write_ledger(ledger_path, statements, skipped_sources=skipped_sources, decision_sources=decision_sources, source_counts=source_counts)
+
+    # Print ledger to the terminal when read-only
+    if not write:
+        print(format_ledger(statements, skipped_sources=skipped_sources, decision_sources=decision_sources, source_counts=source_counts))
 
     counts = {"pending": 0, "covered": 0, "accepted": 0, "dropped": 0, "routed": 0}
     pending_by_folder_and_class = {}
@@ -1561,7 +1668,6 @@ def cmd_status(root: Path):
                 elif s_class in ("derivable-data", "derivable-tokens", "derivable-ui", "derivable-layout"):
                     pending_local_derivable_count += 1
 
-    decision_sources = read_ledger_decision_sources(ledger_path)
     cov_pct, cov_count, rel_count = calculate_coverage(statements)
 
     print("Legacy Parity Status:")
@@ -1607,6 +1713,7 @@ def main():
 
     p_inv = sub.add_parser("inventory", help="Inventory legacy statements into ledger.")
     p_inv.add_argument("--include-skipped", action="store_true", help="Include skipped sources in inventory statements.")
+    p_inv.add_argument("--write", action="store_true", help="Write .agents/legacy-parity.md file (read-only by default).")
     p_inv.add_argument("--root", default=".", help="Project root directory.")
 
     p_batch = sub.add_parser("batch", help="Print pending statements for an area.")
@@ -1624,13 +1731,14 @@ def main():
     p_apply.add_argument("--root", default=".", help="Project root directory.")
 
     p_status = sub.add_parser("status", help="Check parity status and exit 1 if blocking items are pending.")
+    p_status.add_argument("--write", action="store_true", help="Update .agents/legacy-parity.md file (read-only by default).")
     p_status.add_argument("--root", default=".", help="Project root directory.")
 
     args = ap.parse_args()
     root = Path(args.root).resolve()
 
     if args.command == "inventory":
-        cmd_inventory(root, include_skipped=args.include_skipped)
+        cmd_inventory(root, include_skipped=args.include_skipped, write=args.write)
     elif args.command == "batch":
         cmd_batch(root, args.area, args.limit)
     elif args.command == "apply":
@@ -1639,7 +1747,7 @@ def main():
         route_ids = [x.strip() for x in args.route.split(",") if x.strip()]
         cmd_apply(root, accept_ids, drop_ids, route_ids, args.route_class, args.yes, args.reason)
     elif args.command == "status":
-        cmd_status(root)
+        cmd_status(root, write=args.write)
 
 
 if __name__ == "__main__":

@@ -28,7 +28,7 @@ Ask in as few messages as possible. Offer a default with every question. Accept 
 4. Copy style: plain sentences, or minimal labels.
 5. The 1 to 3 data rules that must never break (for example one timestamp per record).
 6. What needs your approval before it changes (storage keys, schema, public API).
-7. Branch workflow: default branch (detected from git or main), whether you use pull requests, merge method (squash, merge, rebase; default: squash), and workflow mode (ask, always, off; default: ask).
+7. Branch workflow: default branch (detected from git or main), whether you use pull requests, merge method (merge, squash, rebase; default: merge), and workflow mode (ask, always, off; default: ask).
 
 Turn each answer into profile fields and rules. Do not keep the answer only in chat.
 
@@ -41,4 +41,4 @@ Ask only the ones discovery could not answer. Maximum 5 per batch.
 3. Which rules in the existing docs are enforced by a test or lint rule, and which are only habit?
 4. What needs your approval before it changes?
 5. Should agents ever push to the remote? Default: never.
-6. Branch workflow: default branch (detected: <branch>), whether you use pull requests, merge method (squash, merge, rebase; default: squash), and workflow mode (ask, always, off; default: ask).
+6. Branch workflow: default branch (detected: <branch>), whether you use pull requests, merge method (merge, squash, rebase; default: merge), and workflow mode (ask, always, off; default: ask).

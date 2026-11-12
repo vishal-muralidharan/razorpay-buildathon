@@ -50,6 +50,14 @@ CONVENTION_SKILLS = {
     "review-db-structure",
 }
 
+BUILD_FORGE_GENERATED_FILES = {
+    "AGENTS.md",
+    "AGENTS.generated.md",
+    ".agents/repo-map.md",
+    ".agents/custom-orphans.md",
+    ".agents/legacy-parity.md",
+}
+
 STAMP_RE = re.compile(r"^<!-- build-forge:generated v1 body=([0-9a-f]{64}) -->\n?", re.MULTILINE)
 CUSTOM_BLOCK_RE = re.compile(
     r"<!-- BEGIN CUSTOM: ([a-z0-9-]{1,40}) -->\n?(.*?)<!-- END CUSTOM: \1 -->\n?",
@@ -87,11 +95,25 @@ def path_matches(root: Path, pat: str) -> bool:
     return False
 
 
+
+DEFAULT_PROFILE = ".agents/project-profile.yaml"
+
+
+def resolve_profile_arg(profile, root=None) -> str:
+    """Return the profile path. Defaults to .agents/project-profile.yaml under --root or the current folder."""
+    if profile:
+        return profile
+    candidate = Path(root or ".") / DEFAULT_PROFILE
+    if not candidate.is_file():
+        sys.exit(f"ERROR: no profile at {candidate}. Pass --profile <path>.")
+    return str(candidate)
+
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--profile", required=True)
+    ap.add_argument("--profile", default=None, help="Defaults to .agents/project-profile.yaml under --root")
     ap.add_argument("--root", default=".")
     a = ap.parse_args()
+    a.profile = resolve_profile_arg(a.profile, a.root)
     root = Path(a.root).resolve()
     prof = yaml.safe_load(Path(a.profile).read_text()) or {}
     errors, warnings = [], []

@@ -452,7 +452,7 @@ def cmd_merge_local(args, root, profile):
         return 1
 
     wf = profile.get("git", {}).get("workflow", {})
-    method = wf.get("merge_method", "squash")
+    method = wf.get("merge_method", "merge")
 
     # Run check command if configured
     check_cmd = profile.get("commands", {}).get("check")

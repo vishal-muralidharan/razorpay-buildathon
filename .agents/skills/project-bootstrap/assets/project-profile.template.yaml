@@ -2,7 +2,7 @@
 # Every pipeline skill reads this file first. Edit it, then re-render:
 #   python3 .agents/skills/project-bootstrap/scripts/render.py --profile .agents/project-profile.yaml
 # Fields marked "TODO" are unresolved. The validator flags them.
-schema_version: 1
+schema_version: 2
 
 project:
   name: "TODO"
@@ -78,7 +78,7 @@ git:
     mode: ask               # off | ask | always
     branch_format: "<type>/<slug>"
     sync: merge             # merge | rebase
-    merge_method: squash    # squash | merge | rebase
+    merge_method: merge     # merge | squash | rebase. merge keeps every commit in the history
     remote: origin
     cleanup: ask            # ask | keep
     worktree: false
@@ -129,6 +129,10 @@ rules:                      # write each rule ONCE, here
 
 # Pack rule IDs permanently dropped by the user:
 # dropped_pack_rules: []
+
+blueprints:                 # facts extracted from code by project-blueprints
+  enabled: true
+  dir: .agents/blueprints
 
 docs:
   readme: README.md
