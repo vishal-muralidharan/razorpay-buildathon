@@ -1,4 +1,4 @@
-<!-- build-forge:generated v1 body=f5c49449feb8e27b08217f8f70fa53276bdb7d77b7d4ffd31c31ac37c4363f93 -->
+<!-- build-forge:generated v1 body=8680f263392eb33843c509fed9b8b447e4d7784f7b45f42c1e5d03dbb37ebf9e -->
 <!-- Generated from .agents/project-profile.yaml by project-bootstrap. Edit the profile, then re-render. -->
 
 # Agent Guidelines for razorpay-buildathon
@@ -31,6 +31,14 @@ Read the skill listed for each area before you touch it. Skills live in `.agents
 5. Commit.
 6. Sync docs and the repo map.
 7. Report open questions and known issues.
+
+## Project rules
+
+- Never ship console.log or console.debug calls in production source code. (enforced by test) `[web-no-console]`
+- Links targeting blank must include rel with noopener or noreferrer on the same tag line. (enforced by test) `[web-target-blank-rel]`
+- Never use eval() or equivalent dynamic script execution without a listed exception. (enforced by test) `[web-no-raw-eval]`
+- Never assign to innerHTML or use dangerouslySetInnerHTML without a listed exception. (enforced by test) `[web-no-inner-html]`
+- Never commit .env files containing local configurations or secrets. (enforced by test) `[web-no-committed-env]`
 
 ## Commands
 
