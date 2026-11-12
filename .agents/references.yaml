@@ -1,0 +1,255 @@
+schema_version: 1
+vendor_in_git: false
+references:
+- name: a11y-debugging
+  kind: skill
+  category: accessibility
+  purpose: Debug accessibility issues with Chrome DevTools
+  source:
+    type: git
+    url: https://github.com/ChromeDevTools/chrome-devtools-mcp
+    subpath: skills/a11y-debugging
+    ref: aade3be8f65d8afc941c97b498b9752ef562f181
+  pinned_commit: aade3be8f65d8afc941c97b498b9752ef562f181
+  license: Unknown
+  activation: pipeline-only
+  allow_scripts: false
+  used_by:
+  - audit
+  - verify
+  triggers:
+    paths: []
+    keywords: []
+  mode: advisory
+  status: installed
+  path: .agents/vendor/a11y-debugging
+  approved: true
+- name: chrome-devtools
+  kind: skill
+  category: browser
+  purpose: Inspect and debug pages with Chrome DevTools
+  source:
+    type: git
+    url: https://github.com/ChromeDevTools/chrome-devtools-mcp
+    subpath: skills/chrome-devtools
+    ref: aade3be8f65d8afc941c97b498b9752ef562f181
+  pinned_commit: aade3be8f65d8afc941c97b498b9752ef562f181
+  license: Unknown
+  activation: pipeline-only
+  allow_scripts: false
+  used_by:
+  - audit
+  - verify
+  triggers:
+    paths: []
+    keywords: []
+  mode: advisory
+  status: installed
+  path: .agents/vendor/chrome-devtools
+  approved: true
+- name: chrome-devtools-cli
+  kind: skill
+  category: browser
+  purpose: Chrome DevTools command line usage
+  source:
+    type: git
+    url: https://github.com/ChromeDevTools/chrome-devtools-mcp
+    subpath: skills/chrome-devtools-cli
+    ref: aade3be8f65d8afc941c97b498b9752ef562f181
+  pinned_commit: aade3be8f65d8afc941c97b498b9752ef562f181
+  license: Unknown
+  activation: pipeline-only
+  allow_scripts: false
+  used_by:
+  - audit
+  - verify
+  triggers:
+    paths: []
+    keywords: []
+  mode: advisory
+  status: installed
+  path: .agents/vendor/chrome-devtools-cli
+  approved: true
+- name: cookie-debugging
+  kind: skill
+  category: browser
+  purpose: Debug cookie problems in the browser
+  source:
+    type: git
+    url: https://github.com/ChromeDevTools/chrome-devtools-mcp
+    subpath: skills/cookie-debugging
+    ref: aade3be8f65d8afc941c97b498b9752ef562f181
+  pinned_commit: aade3be8f65d8afc941c97b498b9752ef562f181
+  license: Unknown
+  activation: pipeline-only
+  allow_scripts: false
+  used_by:
+  - audit
+  - verify
+  triggers:
+    paths: []
+    keywords: []
+  mode: advisory
+  status: installed
+  path: .agents/vendor/cookie-debugging
+  approved: true
+- name: debug-optimize-lcp
+  kind: skill
+  category: performance
+  purpose: Debug and optimize Largest Contentful Paint
+  source:
+    type: git
+    url: https://github.com/ChromeDevTools/chrome-devtools-mcp
+    subpath: skills/debug-optimize-lcp
+    ref: aade3be8f65d8afc941c97b498b9752ef562f181
+  pinned_commit: aade3be8f65d8afc941c97b498b9752ef562f181
+  license: Unknown
+  activation: pipeline-only
+  allow_scripts: false
+  used_by:
+  - audit
+  - verify
+  triggers:
+    paths: []
+    keywords: []
+  mode: advisory
+  status: installed
+  path: .agents/vendor/debug-optimize-lcp
+  approved: true
+- name: memory-leak-debugging
+  kind: skill
+  category: performance
+  purpose: Find and fix browser memory leaks
+  source:
+    type: git
+    url: https://github.com/ChromeDevTools/chrome-devtools-mcp
+    subpath: skills/memory-leak-debugging
+    ref: aade3be8f65d8afc941c97b498b9752ef562f181
+  pinned_commit: aade3be8f65d8afc941c97b498b9752ef562f181
+  license: Unknown
+  activation: pipeline-only
+  allow_scripts: false
+  used_by:
+  - audit
+  - verify
+  triggers:
+    paths: []
+    keywords: []
+  mode: advisory
+  status: installed
+  path: .agents/vendor/memory-leak-debugging
+  approved: true
+- name: troubleshooting
+  kind: skill
+  category: browser
+  purpose: Troubleshoot Chrome DevTools setup
+  source:
+    type: git
+    url: https://github.com/ChromeDevTools/chrome-devtools-mcp
+    subpath: skills/troubleshooting
+    ref: aade3be8f65d8afc941c97b498b9752ef562f181
+  pinned_commit: aade3be8f65d8afc941c97b498b9752ef562f181
+  license: Unknown
+  activation: pipeline-only
+  allow_scripts: false
+  used_by:
+  - audit
+  - verify
+  triggers:
+    paths: []
+    keywords: []
+  mode: advisory
+  status: installed
+  path: .agents/vendor/troubleshooting
+  approved: true
+- name: supabase
+  kind: skill
+  category: backend
+  purpose: Supabase usage guidance
+  source:
+    type: git
+    url: https://github.com/supabase/agent-skills
+    subpath: skills/supabase
+    ref: c9be0e931b7930f7d02126d04774d904c381e7d7
+  pinned_commit: c9be0e931b7930f7d02126d04774d904c381e7d7
+  license: Unknown
+  activation: pipeline-only
+  allow_scripts: false
+  used_by:
+  - audit
+  - build
+  triggers:
+    paths: []
+    keywords: []
+  mode: advisory
+  status: installed
+  path: .agents/vendor/supabase
+  approved: true
+- name: supabase-postgres-best-practices
+  kind: skill
+  category: database
+  purpose: Postgres performance and schema best practices
+  source:
+    type: git
+    url: https://github.com/supabase/agent-skills
+    subpath: skills/supabase-postgres-best-practices
+    ref: c9be0e931b7930f7d02126d04774d904c381e7d7
+  pinned_commit: c9be0e931b7930f7d02126d04774d904c381e7d7
+  license: Unknown
+  activation: pipeline-only
+  allow_scripts: false
+  used_by:
+  - audit
+  - build
+  triggers:
+    paths: []
+    keywords: []
+  mode: advisory
+  status: installed
+  path: .agents/vendor/supabase-postgres-best-practices
+  approved: true
+- name: vercel-cli
+  kind: skill
+  category: deploy
+  purpose: Vercel command line usage
+  source:
+    type: git
+    url: https://github.com/vercel/vercel
+    subpath: skills/vercel-cli
+    ref: 84878e532142f0ac584953695658b324eb9e5b80
+  pinned_commit: 84878e532142f0ac584953695658b324eb9e5b80
+  license: Unknown
+  activation: pipeline-only
+  allow_scripts: false
+  used_by:
+  - deploy
+  triggers:
+    paths: []
+    keywords: []
+  mode: advisory
+  status: installed
+  path: .agents/vendor/vercel-cli
+  approved: true
+- name: security-audit
+  kind: skill
+  category: security
+  purpose: Security review of code and services
+  source:
+    type: git
+    url: https://github.com/cloudflare/security-audit-skill
+    subpath: skills/security-audit
+    ref: c1c8a8c1471069fb0e188eeaff69b8e8db6564a8
+  pinned_commit: c1c8a8c1471069fb0e188eeaff69b8e8db6564a8
+  license: Unknown
+  activation: pipeline-only
+  allow_scripts: false
+  used_by:
+  - audit
+  - report
+  triggers:
+    paths: []
+    keywords: []
+  mode: advisory
+  status: installed
+  path: .agents/vendor/security-audit
+  approved: true

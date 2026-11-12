@@ -1,0 +1,167 @@
+{
+  "a11y-debugging": {
+    "commit": "aade3be8f65d8afc941c97b498b9752ef562f181",
+    "files": {
+      "SKILL.md": "e6e1620e4c1d54bef04c3de1bdabb327602b62b7b3db703557865eac84b871b1",
+      "references/a11y-snippets.md": "93a02d8889738300461b63da77c1647d4d0156fd9b75107574fbed0a931c20ab"
+    },
+    "path": ".agents/vendor/a11y-debugging"
+  },
+  "chrome-devtools": {
+    "commit": "aade3be8f65d8afc941c97b498b9752ef562f181",
+    "files": {
+      "SKILL.md": "69a65d0276dd2b6a2fff9889d45be154754b7eb589ca019346cdc9319e6439bb"
+    },
+    "path": ".agents/vendor/chrome-devtools"
+  },
+  "chrome-devtools-cli": {
+    "commit": "aade3be8f65d8afc941c97b498b9752ef562f181",
+    "files": {
+      "SKILL.md": "6e55a0a67f665c3e0b7774b8652d1bb7a45c4a8f784164eba06b5e7d80f1c5c1",
+      "references/installation.md": "e1517c49bfd8f22117fcd2cfb2193e082d0e8d0f96d0675619c346f48a1b6e32"
+    },
+    "path": ".agents/vendor/chrome-devtools-cli"
+  },
+  "cookie-debugging": {
+    "commit": "aade3be8f65d8afc941c97b498b9752ef562f181",
+    "files": {
+      "SKILL.md": "f0f0daa1d75def39492c7430ccd5d98e7ff54ba370f3677147dd3b93b0712e05"
+    },
+    "path": ".agents/vendor/cookie-debugging"
+  },
+  "debug-optimize-lcp": {
+    "commit": "aade3be8f65d8afc941c97b498b9752ef562f181",
+    "files": {
+      "SKILL.md": "d6486b728d7c891ed67280d05880dc396499242b02f3041d9e62c8e83c1ba5f3",
+      "references/elements-and-size.md": "a99e9e5f93ad2e5b5b65e84abd2bb220e0560be66cc87059361f1d5f7ef2aed7",
+      "references/lcp-breakdown.md": "c63bb071fa465c41464446100f4afc069118eab9092cbec0b284dd452404a947",
+      "references/lcp-snippets.md": "b54d0c26e9df7eea1e58cc118bbbe1ef2037d097a146603ef31c17fe47a6b8b8",
+      "references/optimization-strategies.md": "786691daf6216f1aacb0e2bafdc08ef8450067a392ab26814337ac9837c048c1"
+    },
+    "path": ".agents/vendor/debug-optimize-lcp"
+  },
+  "memory-leak-debugging": {
+    "commit": "aade3be8f65d8afc941c97b498b9752ef562f181",
+    "files": {
+      "SKILL.md": "895127ac55a3f2c4e0ca9be496e84165eee6408637c2bcc5516d69170a8de80e",
+      "references/common-leaks.md": "2d41e075d8d22e69bc420a9eb4bc180eb2466669ffd0939c201723d80b2673a1"
+    },
+    "path": ".agents/vendor/memory-leak-debugging"
+  },
+  "security-audit": {
+    "commit": "c1c8a8c1471069fb0e188eeaff69b8e8db6564a8",
+    "files": {
+      "AI-AND-LLM.md": "7335a95c43554eadefcf03ece639291bb0e038c398a179299e3887ffe06bd2ef",
+      "ATTACK-CLASSES.md": "3ee4f00c6e8c9dcf6dd02dd5ac2a4ceb322e2085f3e9fbe79cf0c6330bc7ef83",
+      "CLIENT-SIDE.md": "613f6b98f86083e045525c5b60154ffdab122bac35f1e05eb17488e6e453370c",
+      "CLOUD-AND-DEPLOYMENT.md": "3c80f3088be22345e07b057c056d6ed99fe2b0304f794398964f7ccd5a496ca3",
+      "DATA-ISOLATION-AND-LIFECYCLE.md": "307dcb3e24d292715c4a041190e7bb135646a37eb6187619ae01d000a634a4ad",
+      "DESKTOP-MOBILE-AND-LOCAL-IPC.md": "58eae8ee0ca6a46611c501ec5a3ab47fdff88dd7db0d8d74789bbf8bb19d8cb2",
+      "HUNTING.md": "71c121decea1322c47c718f6e110f1a892980bb4266bd7ac55ef043a213ade09",
+      "MEMORY-SAFETY-AND-BINARY.md": "7c8b0dccfb35315cca2455509674d49632b2fe37e1f3aac16c1a496a7e9924a7",
+      "PROTOCOLS-RPC-AND-MESSAGING.md": "8b73816fa5b3697c9c40977f0c836b40f01d6e81929ff2720fe83ce089e9a619",
+      "RECONNAISSANCE.md": "02ca887aca84de8ae137f1891bd2f0a54f28d3fa6da92a27f54734382b3381a2",
+      "RESOURCE-EXHAUSTION-AND-AVAILABILITY.md": "4326fab5c92a0b4c420a70196254040105cd794026562130b59bf1a6db3e4baa",
+      "SKILL.md": "5e3e96a1e438d8f35fef0a1e38f02d4f00e2bdf910401b7dfe00e6779c6dac85",
+      "SUPPLY-CHAIN-AND-RELEASE.md": "f372e919940e335468ba1ae09f99026c3986a345f7fe26f8068f132e199f52a5",
+      "VALIDATION-AND-REPORTING.md": "b892470cb89bb31f33403e050d4bdfbe2cdaef940ade1496fa65e32b2e129449",
+      "WEB-PROTOCOL-AND-AUTH.md": "4f3066dffa23c5635859187be9b96c32f2aff29a688186b91ff0c63e47d62b5c",
+      "report-schema.json": "6575c9de4a62255699ea052ebf9a49ebfb373a32891bcd89af6f55cc84b35519",
+      "validate-coverage-ledger.cjs": "2eb280bd2e33c002916f86db9b29f9edfedb6454e5db973c766290465b868ac8",
+      "validate-coverage-ledger.test.cjs": "cfb9df26b03469a4279a70e7664a2a5434dd6f8c2c204e91f9b0aeb9dd71e648",
+      "validate-findings.cjs": "e85f232e36bfac0f866f244da50376692d6b45c690beadcb00608b0e6c8b5283",
+      "validate-findings.test.cjs": "b92001117a92c4161d43777a0ba2fa182a8a4d97f2304cc8c0cee5331497b73b"
+    },
+    "path": ".agents/vendor/security-audit"
+  },
+  "supabase": {
+    "commit": "c9be0e931b7930f7d02126d04774d904c381e7d7",
+    "files": {
+      "CHANGELOG.md": "4b9c9387871d7888f18e9c97a7d5691ea38e333401ccdcb0161d2140cb16b2d8",
+      "SKILL.md": "697e0e949f97621c6fc1784169eb3ccbf673747d6bb8299a52962d3d84d93dc6",
+      "assets/feedback-issue-template.md": "ea211aa174c5a096fe76461f25143b8bc23f3bde3adc9e727cda38218cc8c282",
+      "references/skill-feedback.md": "09ad94c0291735dfc04c92557c8734fa259ec39e1d56bf2bd5c6a6529d838717"
+    },
+    "path": ".agents/vendor/supabase"
+  },
+  "supabase-postgres-best-practices": {
+    "commit": "c9be0e931b7930f7d02126d04774d904c381e7d7",
+    "files": {
+      "CHANGELOG.md": "751ad110037c85d400018c9894716a04fa46357ff55c22b1169b280752e19e88",
+      "SKILL.md": "ad65e776f45e761bafc609d3f506c77c1032225aa65e0c4c02f241b8071e5855",
+      "references/_contributing.md": "191e039e7d94764e6073410b513b559f9a594e0fdf0252a30c2a2986df2ab3bc",
+      "references/_sections.md": "c9e992612b422c7122de0b7542ebc2450db283edaab08cfe86c6d657fcccccd5",
+      "references/_template.md": "6299954250f212caabe339d752c3e5313a8e07d1a182a4e4b425baee91df1bd2",
+      "references/advanced-full-text-search.md": "40c2606bbb4c4dce31308f201b24cc7f58c7df05b1d9c6856fe2b888d3b7cf28",
+      "references/advanced-jsonb-indexing.md": "24cacf6a8bc35901dd566d24502ce8e57f810a5c196b897e61d52726e521d106",
+      "references/conn-idle-timeout.md": "630588902c00fcec59a5988cc5d042f76dcf2c923a535abfd8c47dca205eaed5",
+      "references/conn-limits.md": "11b2a67a7c7679cbbc5d807bbb17e69c98484a581d0c8b929c03408f412b81b2",
+      "references/conn-pooling.md": "88cf086bf98ba865d2e9d0579974e1366b14157619d6a93e7da77be91084e4a5",
+      "references/conn-prepared-statements.md": "174e9332fe3dda5c99b2b00159fb1915ae36c00bab3a7882c14e73e4344e946e",
+      "references/data-batch-inserts.md": "531933b82d6a622d0fae29e0ea80be6fe5d78655adf2804c271ea84a1930de37",
+      "references/data-n-plus-one.md": "21a44905e5b16a42741892ec34bb1bfef124d049b140a76934a9acd0f46f5fc2",
+      "references/data-pagination.md": "73c9fa10a3d439bedea0e11b640bd25bf30dd50f0d9006cf85baf7c3151543fa",
+      "references/data-upsert.md": "2612af83b20a2701dde30ef1f8d7efd26b7e9eef84717226b8f038a2d2150ff7",
+      "references/lock-advisory.md": "c88d259dbf81c3771438f59a165f7eab8acd09999dd370bdf807521c73f35aab",
+      "references/lock-deadlock-prevention.md": "09aee46f51d7178c8e55fe056cd5a94a64ba2c122fe418e6900cd99f297b2347",
+      "references/lock-short-transactions.md": "5aa7f61095916986d39644b446cdbcd2bacca7ef698a3bb50b3f82dd60207602",
+      "references/lock-skip-locked.md": "6c45077f430f29cd9cd8f448c94d578e827e7bd023fcdaf717a756acb116fa4b",
+      "references/monitor-explain-analyze.md": "4cb67ffbf8e57f2e5b380b0beb4242528b513723ce314a2c2ffcf083bd4203d7",
+      "references/monitor-pg-stat-statements.md": "89dca99d4e894fcbdcac136be7ad9fbc03d1342904f065c1b198dc9cf495f098",
+      "references/monitor-vacuum-analyze.md": "2892272011710eb49b3f185ec12f15ce9ce4c365792c672f6e2a9c90da426a1a",
+      "references/query-composite-indexes.md": "73e42424e671f0266e74fdb220db3196790f69fb43e2b19c7b9483eb4971b554",
+      "references/query-covering-indexes.md": "daf2a7f0477fb7357b62b5fb5b185b1995a77a186347e45cb780e25e7a7589b6",
+      "references/query-index-types.md": "472a74f22c2df203bd0154999b3a5a0187cca2ab3d9a3978e305bb7c32f1a282",
+      "references/query-missing-indexes.md": "91ad8b0ff4365704b4830a7f077c6f140f7140fd5d3ce5cd0b92b160cf9e25f1",
+      "references/query-partial-indexes.md": "6448982bc8558c6555284958edc331b29239c6a0130e6b4501dd6d4da607a6dd",
+      "references/schema-constraints.md": "90e8efda3e9e81095e642911ad4aae2809d160f29414338fa997253238f510f8",
+      "references/schema-data-types.md": "e01b58c14c7f3f65d8ead580b9a4fcf70b83baaab0f9a5f83c569c9fd113e8c8",
+      "references/schema-foreign-key-indexes.md": "7587713d12a65a212365459b3d39e4717d8a79e4073b10bd62f1054d8192c0dd",
+      "references/schema-lowercase-identifiers.md": "4bc80f70865f2390872591f326c8a6be6456a0aeb5a7e5a2475d7cd9d43059ab",
+      "references/schema-partitioning.md": "541e13fbeaf4bb1485c9059d4c9417dbdb766cf16f4237cd63a04ada7ec45b90",
+      "references/schema-primary-keys.md": "3c8beabef82066f9a0838b926da0885117fd2d9a263aaf84cb5ca9e5f0d400e9",
+      "references/security-privileges.md": "095909274a4fb43df785d7144cf674eeb40284d2d45628f14af4108737b93663",
+      "references/security-rls-basics.md": "e04dd1a3a382aafdaaa73fe9f7976352acdde6e90c2a2470d281b94d4f44b096",
+      "references/security-rls-performance.md": "2e1faeca7d5746e246b1c78f9492fe2a9cfa41c4d7fa1e23c402d58fa18ea014"
+    },
+    "path": ".agents/vendor/supabase-postgres-best-practices"
+  },
+  "troubleshooting": {
+    "commit": "aade3be8f65d8afc941c97b498b9752ef562f181",
+    "files": {
+      "SKILL.md": "80357d865f9604c12403b9754c1a513d4ee8afcfda84423c7a0e62a246c472f7"
+    },
+    "path": ".agents/vendor/troubleshooting"
+  },
+  "vercel-cli": {
+    "commit": "84878e532142f0ac584953695658b324eb9e5b80",
+    "files": {
+      "SKILL.md": "e5091f0000bdf245dd1e917ed3ea4aa05ca8687abef1830c5208ee1dad8ed7b8",
+      "command/vercel.md": "6935ce7780fa15f9affd7230c33b667e701b58632abe8ecf1cd511a85cd228bf",
+      "references/advanced.md": "ad15d1cb37c5568f1bd974640850f80db26da324b9d385241f576cf5286008ef",
+      "references/agent-and-ai.md": "ee35cc6beeaae7e01186af497cc6541e520e520f17f6c35fc778af658568ae75",
+      "references/bun.md": "ad009b1eb8da4890f32f482330832e3eb3b33aac7c30ab05c3ce5a546fb0de9f",
+      "references/ci.md": "5ff744476d1ea5053aa0d2cced2a94b595c345a7f24c2f2c5e6fc5658615016a",
+      "references/comments.md": "51446441c201521642af31d0f8cd60640c60ba70ca5bc76f5b1e1c1d357b4567",
+      "references/connectors.md": "5269798967a927d209a3844ecb9de9dddedfa95aaff96f4bbe1cfcceac818b11",
+      "references/container-registry.md": "c7c5c37bb9f3fbd8b80432441347c860e67458d65420b7da5ab9b3a5a7e0e671",
+      "references/deployment.md": "edadd4e74f364ea6a6851b0d9e67fbc949ca5d0eff1a332a396317bb71446196",
+      "references/domains-and-dns.md": "1c3dc7862895d8a769b0354cfef6c8a671fd15da9d892748ba7173bfccf85a72",
+      "references/environment-variables.md": "4b6758ffadacda963c6b5d36afcd5f3cfb1b29a282b5695d357c0a03ac55a162",
+      "references/firewall.md": "8e533593dc95bebd6e86be21e2b805d02dbefa4f32ef43a7d11a4631bfdf7898",
+      "references/flags.md": "d818dea50edb24f65aa2f96ea602b53803f8e56b434d6432d4c27e2f9110560e",
+      "references/integrations.md": "b53fb831c777b7966ac0cdff553fcc634eb8c86e753de06cf3454793e34bbb51",
+      "references/microfrontends.md": "799213e5f6bbc5ebce2c8b8fbf46e6df52bc47383fe563bd198963752a87e5a6",
+      "references/monitoring-and-debugging.md": "cd1946f07520a10a9417323838f0eb72f95012b82475864a2977b5d5be90111d",
+      "references/monorepos.md": "3c3d6b7119569b60ddc7170f3c4efc320bc678d83df3f20c766cee59934b56eb",
+      "references/node-backends.md": "b885031b9abf4ac0bb87ab373010c95a101f8144c399d5c1dab8b9c61cf12cb0",
+      "references/platform-ops.md": "d3555793d6f50205ae30d2bf0f7f3911a0212b0d3cbc41f001e982441cd4472c",
+      "references/project-infra.md": "acffc11e38d37c43ac4811a27f5e06d7ba6a11c36ea54614e94b9145ab0572e1",
+      "references/projects-and-teams.md": "47005bb03f48395076c9828cabd094cce257b32023e9a615c91b1377a3213b03",
+      "references/routing.md": "7193b12060f191b6faa79a0e4040250c6df17895cb31b2a74baef8c537b83213",
+      "references/sandbox.md": "ca23a03a959f33183ee935bcd268a29b00141ec284246c37729e49e1180c3a61",
+      "references/storage.md": "5b9b5ab57e23e76af55a7d63ff70bbf561b68f0a5c9da300dd0c97642b3be290"
+    },
+    "path": ".agents/vendor/vercel-cli"
+  }
+}
