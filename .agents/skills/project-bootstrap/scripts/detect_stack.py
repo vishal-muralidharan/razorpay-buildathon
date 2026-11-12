@@ -3,6 +3,10 @@
 
 Usage: python detect_stack.py [repo_root]
 
+Agent folders (.agents, .claude, .cursor and similar) are skipped when the
+script counts source files, naming, tokens and storage hints, so that the
+Build Forge skills installed in the project are never read as project code.
+
 Read-only. Never writes to the repo. The output feeds the draft of
 .agents/project-profile.yaml. Every value is a fact found in a file,
 not a guess. Unknown stays empty.
@@ -16,6 +20,8 @@ from pathlib import Path
 
 IGNORE = {"node_modules", "dist", "build", ".git", ".next", ".nuxt", "coverage",
           ".venv", "venv", "__pycache__", ".turbo", ".vercel", ".netlify", "target", "out"}
+# Agent and tool folders hold installed skills and pointer files, not project code.
+AGENT_DIRS = {".agents", ".claude", ".cursor", ".windsurf", ".gemini", ".codex", ".github"}
 SRC_EXT = {".js", ".jsx", ".ts", ".tsx", ".vue", ".svelte", ".py", ".rs", ".go", ".dart", ".swift", ".kt"}
 
 FRAMEWORKS = [("next", "Next.js"), ("nuxt", "Nuxt"), ("@remix-run/react", "Remix"), ("astro", "Astro"),
@@ -55,6 +61,8 @@ def walk(root, max_depth=4):
     for p in root.rglob("*"):
         rel = p.relative_to(root)
         if any(part in IGNORE for part in rel.parts) or len(rel.parts) > max_depth + 1:
+            continue
+        if rel.parts and rel.parts[0] in AGENT_DIRS:
             continue
         out.append(p)
     return out
@@ -131,6 +139,9 @@ def git_facts(root):
 
 
 def main():
+    if len(sys.argv) > 1 and sys.argv[1] in ("-h", "--help"):
+        print(__doc__.strip())
+        return
     root = Path(sys.argv[1] if len(sys.argv) > 1 else ".").resolve()
     if not root.is_dir():
         sys.exit(f"Not a directory: {root}")

@@ -70,6 +70,24 @@ def strip_dot_slash(path: str) -> str:
     return p
 
 
+# Files that render.py and `build-forge link` create. A profile may name them before they exist.
+GENERATED_OUTPUTS = {"AGENTS.md", "AGENTS.generated.md", "CLAUDE.md", "GEMINI.md",
+                     ".github/copilot-instructions.md", ".cursorrules", ".windsurfrules", ".agents"}
+
+
+def is_generated_output(pat: str, prof: dict) -> bool:
+    """True when a path or glob names a file or folder that Build Forge itself writes."""
+    norm = strip_dot_slash(pat).rstrip("/")
+    if not norm:
+        return False
+    names = set(GENERATED_OUTPUTS)
+    for field in ("docs.agents_file", "docs.repo_map"):
+        value = get(prof, field)
+        if isinstance(value, str) and value.strip():
+            names.add(strip_dot_slash(value).rstrip("/"))
+    return norm in names or norm.startswith(".agents/")
+
+
 def path_matches(root: Path, pat: str) -> bool:
     norm = strip_dot_slash(pat).rstrip("/")
     if not norm:
@@ -84,14 +102,28 @@ def path_matches(root: Path, pat: str) -> bool:
     return False
 
 
+
+DEFAULT_PROFILE = ".agents/project-profile.yaml"
+
+
+def resolve_profile_arg(profile, root=None) -> str:
+    """Return the profile path. Defaults to .agents/project-profile.yaml under --root or the current folder."""
+    if profile:
+        return profile
+    candidate = Path(root or ".") / DEFAULT_PROFILE
+    if not candidate.is_file():
+        sys.exit(f"ERROR: no profile at {candidate}. Pass --profile <path>.")
+    return str(candidate)
+
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--profile", required=True)
+    ap.add_argument("--profile", default=None, help="Defaults to .agents/project-profile.yaml under --root")
     ap.add_argument("--root", default=None)
     ap.add_argument("--strict", action="store_true")
     ap.add_argument("--strict-paths", action="store_true", help="Treat unmatched paths and globs as errors.")
     ap.add_argument("--strict-claims", action="store_true", help="Treat claim-unverified warnings as errors.")
     a = ap.parse_args()
+    a.profile = resolve_profile_arg(a.profile, a.root)
 
     errors, warnings = [], []
     try:
@@ -112,7 +144,11 @@ def main():
 
     cmds = get(prof, "commands", {}) or {}
     if not cmds.get("check") and not all(cmds.get(k) for k in ("lint", "test", "build")):
-        errors.append("commands.check is required, or set lint, test and build")
+        if str(get(prof, "stack.package_manager") or "").strip().lower() == "none":
+            warnings.append("no check command: stack.package_manager is none, so the pipeline skips automated checks")
+        else:
+            errors.append("commands.check is required, or set lint, test and build. "
+                          "For a project with no build tooling, set stack.package_manager to none")
     if "{path}" not in (cmds.get("test_single") or "{path}"):
         warnings.append("commands.test_single should contain {path}")
 
@@ -587,13 +623,13 @@ def main():
             if isinstance(sc, dict):
                 sname = sc.get("name", str(sidx))
                 for pidx, pat in enumerate(sc.get("paths", []) or []):
-                    if isinstance(pat, str) and pat:
+                    if isinstance(pat, str) and pat and not is_generated_output(pat, prof):
                         if not path_matches(root_dir, pat):
                             record_issue(f"unmatched path in git.scopes[{sname}].paths[{pidx}]: '{pat}'")
 
         # 4. structure.root_allowed
         for idx, r in enumerate(get(prof, "structure.root_allowed", []) or []):
-            if isinstance(r, str) and r:
+            if isinstance(r, str) and r and not is_generated_output(r, prof):
                 if not path_matches(root_dir, r):
                     record_issue(f"unmatched pattern in structure.root_allowed[{idx}]: '{r}'")
 

@@ -39,6 +39,7 @@ Stage 6 of the pipeline. Rules live once, in the profile. AGENTS.md and the conv
    - If hand edits exist outside custom blocks, `--update` refuses the file, prints a unified diff, and leaves files unchanged. Run with `--salvage` (or `--force`) to regenerate and preserve hand edits into a `salvaged` custom block. Hand edits are never discarded unless `--discard-edits` and `--yes-discard` are passed together.
    - Unstamped files are never overwritten silently. Run with `--migrate-custom` to wrap unstamped files into a `legacy` custom block, or `--force --overwrite-unstamped` to overwrite.
    - If project-bootstrap is not installed, edit the generated files to match the profile by hand and say so.
+   - Run `python3 .agents/skills/project-bootstrap/scripts/check_preservation.py --root . --base <base_ref> --head HEAD` to confirm that non-generated rules and table rows are preserved.
 5. **Refresh the repo map.** Run `repo-search` in map mode.
 6. **Update the README** sections named in the map above.
 7. **Search for old names.** Search the docs, skills and README for names that no longer exist: moved files, removed components, removed tokens, old commands.

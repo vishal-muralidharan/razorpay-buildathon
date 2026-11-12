@@ -99,13 +99,27 @@ def suggest_scopes(scopes: list, files: list) -> tuple:
     return positive_matches, all_alphabetical
 
 
+
+DEFAULT_PROFILE = ".agents/project-profile.yaml"
+
+
+def resolve_profile_arg(profile, root=None) -> str:
+    """Return the profile path. Defaults to .agents/project-profile.yaml under --root or the current folder."""
+    if profile:
+        return profile
+    candidate = Path(root or ".") / DEFAULT_PROFILE
+    if not candidate.is_file():
+        sys.exit(f"ERROR: no profile at {candidate}. Pass --profile <path>.")
+    return str(candidate)
+
 def main():
     ap = argparse.ArgumentParser(description="Suggest commit scopes based on file paths.")
-    ap.add_argument("--profile", required=True, help="Path to .agents/project-profile.yaml")
+    ap.add_argument("--profile", default=None, help="Path to the profile. Defaults to .agents/project-profile.yaml under --root")
     ap.add_argument("--files", nargs="*", help="List of file paths to rank")
     ap.add_argument("--staged", action="store_true", help="Inspect git staged files")
     ap.add_argument("--root", default=".", help="Project repository root directory")
     a = ap.parse_args()
+    a.profile = resolve_profile_arg(a.profile, a.root)
 
     prof_path = Path(a.profile).resolve()
     if not prof_path.is_file():

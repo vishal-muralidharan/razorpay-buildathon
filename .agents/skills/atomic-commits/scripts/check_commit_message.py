@@ -44,11 +44,25 @@ def build_regex(fmt):
     return re.compile("^" + "".join(out) + "$")
 
 
+
+DEFAULT_PROFILE = ".agents/project-profile.yaml"
+
+
+def resolve_profile_arg(profile, root=None) -> str:
+    """Return the profile path. Defaults to .agents/project-profile.yaml under --root or the current folder."""
+    if profile:
+        return profile
+    candidate = Path(root or ".") / DEFAULT_PROFILE
+    if not candidate.is_file():
+        sys.exit(f"ERROR: no profile at {candidate}. Pass --profile <path>.")
+    return str(candidate)
+
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--profile", required=True)
+    ap.add_argument("--profile", default=None, help="Defaults to .agents/project-profile.yaml")
     ap.add_argument("message")
     a = ap.parse_args()
+    a.profile = resolve_profile_arg(a.profile)
 
     prof = yaml.safe_load(Path(a.profile).read_text()) or {}
     git = prof.get("git") or {}
