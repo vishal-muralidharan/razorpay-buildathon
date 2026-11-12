@@ -11,3 +11,6 @@ frontend/dist/
 frontend/.env.local
 .agents/work/
 .agents/vendor/
+.env
+.env.*
+!.env.example
