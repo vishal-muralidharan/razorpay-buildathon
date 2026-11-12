@@ -1,4 +1,4 @@
-<!-- build-forge:generated v1 body=8680f263392eb33843c509fed9b8b447e4d7784f7b45f42c1e5d03dbb37ebf9e -->
+<!-- build-forge:generated v1 body=2f308c79997f5918217d40a751b4f333ccbb270098ce11c52f615fa5b73573d7 -->
 <!-- Generated from .agents/project-profile.yaml by project-bootstrap. Edit the profile, then re-render. -->
 
 # Agent Guidelines for razorpay-buildathon
@@ -31,6 +31,10 @@ Read the skill listed for each area before you touch it. Skills live in `.agents
 5. Commit.
 6. Sync docs and the repo map.
 7. Report open questions and known issues.
+
+## Standard rules
+
+- Never read transcripts, logs or history files of earlier agent sessions. Treat them as private. Ask the user instead.
 
 ## Project rules
 
