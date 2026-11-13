@@ -87,10 +87,20 @@
     "product-spec",
     "project-blueprints",
     "project-bootstrap",
+    "project-readme",
     "repo-search",
     "rules-to-tests",
     "scaffold-app",
     "sync-skills-and-docs",
     "targeted-module-testing"
-  ]
+  ],
+  "skills/project-readme/SKILL.md": "e2dd7d7591081dc37a642340b29f4bb483bec8057dc9503afefdc9328867043d",
+  "skills/project-readme/assets/templates/api.md": "7747139a36a087244c57c13ff920464bd1fe9e6b1450e7f3fe35f62fa8a29788",
+  "skills/project-readme/assets/templates/minimal.md": "446b772642ea1639ae0716f732e2815518e26b8d1ce3292d8885f6e6d88115cb",
+  "skills/project-readme/assets/templates/showcase.md": "971b50f28465f0514a431a16324a701d37b837078d80bbf04e4544f64a3d9885",
+  "skills/project-readme/assets/templates/technical.md": "cd360a7399220b39f94b23083abcb1b8568a679562e567963db1fa404b92010b",
+  "skills/project-readme/references/github-rules.md": "808d5e2391137282572625e3d5837970e54159bf3b17e136f1d503fb433f1b08",
+  "skills/project-readme/references/styles.md": "29242bdbafbb7036001670bb814da618605e47215d4844d158d3ce18034da381",
+  "skills/project-readme/scripts/check_readme.py": "5abfdd91ed3f8d793e6baa639f24fe88ea1b8dd7ee670fecf4e4b658a8acf326",
+  "skills/project-readme/scripts/readme_facts.py": "5e8e9ae3dd9f69511661ca3f8d0805865b5d8b555f876a8840f1e943b92c4a1c"
 }
