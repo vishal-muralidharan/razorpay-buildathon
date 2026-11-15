@@ -7,7 +7,7 @@ requests==2.32.3
 apscheduler==3.11.3
 alembic==1.13.3
 xgboost==2.1.1
-scikit-learn==1.5.2
+scikit-learn==1.9.1
 shap==0.46.0
 pandas==2.2.3
 numpy==2.0.2
