@@ -13,9 +13,15 @@ Failed debit → diagnose → predict best window → schedule within compliance
      to a tamper-evident audit ledger → surface it all on a ROI dashboard
 ```
 
-## Quick start
+## Prerequisites
 
-### Backend
+- Python 3.10 or higher
+- Node.js 18 or higher and npm
+- SQLite 3
+
+## Installation
+
+### Backend Setup
 
 ```bash
 cd backend
@@ -23,6 +29,31 @@ python3 -m venv venv && source venv/bin/activate   # optional but recommended
 pip install -r requirements.txt --break-system-packages   # drop the flag in a venv
 alembic upgrade head                                       # create the database schema
 ENABLE_AUTO_SEED=true python -m scripts.seed_demo           # 25 customers, 55 failed transactions
+```
+
+### Frontend Setup
+
+```bash
+cd frontend
+npm install
+```
+
+### Configuration (.env)
+
+The project includes a `backend/.env.example` file that outlines the optional API keys (Razorpay, Twilio, Auth0). You do **not** need to provide these for local testing or hackathon submissions — the system automatically falls back to simulation mode (synthetic data and mock tokens) if they are missing. 
+
+If you plan to use real test-mode APIs, copy the example file:
+```bash
+cp backend/.env.example backend/.env
+```
+And populate it with your `RAZORPAY_KEY_ID`, `TWILIO_ACCOUNT_SID`, etc. No code changes are needed — `app/razorpay_client.py` and `app/nudge.py` check for these and fall back to simulation automatically.
+
+## Usage and Quick Start
+
+### Starting the Backend
+
+From the `backend` directory:
+```bash
 uvicorn app.main:app --reload --port 8000
 ```
 
@@ -43,27 +74,16 @@ Authorization: Bearer secret-vela
 see that file for the full list. A real deployment replaces this with a
 proper identity provider - see "Adding real Razorpay UPI" below.)
 
-### Frontend
+### Starting the Frontend
 
+From the `frontend` directory:
 ```bash
-cd frontend
-npm install
 npm run dev
 ```
 
 Open `http://localhost:5173`. It talks to the backend at
 `http://localhost:8000` by default — override with `VITE_API_BASE_URL` in
 `frontend/.env` if you run the API elsewhere.
-
-### Configuration (.env)
-
-The project includes a `backend/.env.example` file that outlines the optional API keys (Razorpay, Twilio, Auth0). You do **not** need to provide these for local testing or hackathon submissions — the system automatically falls back to simulation mode (synthetic data and mock tokens) if they are missing. 
-
-If you plan to use real test-mode APIs, copy the example file:
-```bash
-cp backend/.env.example backend/.env
-```
-And populate it with your `RAZORPAY_KEY_ID`, `TWILIO_ACCOUNT_SID`, etc. No code changes are needed — `app/razorpay_client.py` and `app/nudge.py` check for these and fall back to simulation automatically.
 
 ---
 
@@ -253,3 +273,7 @@ this and a real production deployment:
   not a live feed from NPCI or the bank - there isn't a public one to
   subscribe to. `POST /webhook/bank-status` exists so a downstream partner
   can push updates if they have one.
+
+## License
+
+MIT License. Copyright (c) 2025 Vishal Muralidharan.
