@@ -1,4 +1,10 @@
 style: technical
-description: ''
-homepage: ''
-topics: []
+description: "Fullstack AI revenue recovery system with FastAPI and React for failed UPI Autopay payments. Diagnoses recurring debit failures, predicts optimal recovery windows, enforces NPCI compliance within a strict 3-retry limit, sends Twilio WhatsApp and SMS nudges, logs tamper-evident audit trails, and tracks recovered capital on an ROI dashboard."
+homepage: ""
+topics:
+  - fastapi
+  - react
+  - vite
+  - tailwindcss
+  - razorpay
+  - upi
