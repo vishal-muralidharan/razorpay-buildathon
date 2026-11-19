@@ -2,7 +2,7 @@
 name: file-folder-naming
 description: Use this skill to name files, folders and identifiers in razorpay-buildathon.
 ---
-<!-- build-forge:generated v1 body=3b6f649af1d3bf855133f219b451d0d7b446ea1b0ecfd1923f8d0ad4cfe1f99d -->
+<!-- build-forge:generated v1 body=35d5fd24d12e6b7f170048057ec68c6dedcbd6e0190ad05109d714c686712332 -->
 
 <!-- Generated from .agents/project-profile.yaml by project-bootstrap. Edit the profile, then re-render. -->
 
@@ -11,6 +11,7 @@ description: Use this skill to name files, folders and identifiers in razorpay-b
 | Item | Style | Example |
 |---|---|---|
 | Backend modules | snake_case | `mock_webhook.py` |
+| Frontend components | PascalCase | `TransactionTable.jsx` |
 
 Commit messages: `<type>(<scope>): <subject>`.
 <!-- BEGIN CUSTOM: notes -->
