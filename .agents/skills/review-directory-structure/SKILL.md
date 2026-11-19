@@ -2,7 +2,7 @@
 name: review-directory-structure
 description: Use this skill to place new files or move files in razorpay-buildathon. Describes each source layer and the root cleanliness rule.
 ---
-<!-- build-forge:generated v1 body=852808576d00138e9c80e021ea8500ee0b20aed451dd66b1906fef2c388c25c8 -->
+<!-- build-forge:generated v1 body=e4668f3b7b6ed4f9c657c746cb98f8b554ca1d4f576fb85ad57d3c69fa50f508 -->
 
 <!-- Generated from .agents/project-profile.yaml by project-bootstrap. Edit the profile, then re-render. -->
 
@@ -12,6 +12,9 @@ description: Use this skill to place new files or move files in razorpay-buildat
 |---|---|
 | `backend/app/routers` | FastAPI route handlers |
 | `backend/app` | Backend application models, jobs and logic |
+| `backend/alembic` | Database schema migrations |
+| `backend/scripts` | Seed and test simulation scripts |
+| `backend/tests` | Backend pytest test suites |
 | `frontend/src` | React UI dashboard components and views |
 
 Tests: sit next to the file they test.

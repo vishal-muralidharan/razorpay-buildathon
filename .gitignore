@@ -1,4 +1,6 @@
+mandate_resurrection.db
 backend/mandate_resurrection.db
+*.db
 backend/venv/
 backend/__pycache__/
 backend/app/__pycache__/
@@ -14,3 +16,5 @@ frontend/.env.local
 .env
 .env.*
 !.env.example
+.DS_Store
+**/.DS_Store

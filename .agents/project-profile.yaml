@@ -27,6 +27,12 @@ structure:
     purpose: FastAPI route handlers
   - path: backend/app
     purpose: Backend application models, jobs and logic
+  - path: backend/alembic
+    purpose: Database schema migrations
+  - path: backend/scripts
+    purpose: Seed and test simulation scripts
+  - path: backend/tests
+    purpose: Backend pytest test suites
   - path: frontend/src
     purpose: React UI dashboard components and views
   root_allowed:
@@ -36,6 +42,9 @@ naming:
 - item: Backend modules
   style: snake_case
   example: mock_webhook.py
+- item: Frontend components
+  style: PascalCase
+  example: TransactionTable.jsx
 git:
   push: never
   commit_format: '<type>(<scope>): <subject>'
@@ -54,6 +63,14 @@ git:
     paths:
     - frontend/**
     purpose: React dashboard and charts
+  - name: readme
+    paths:
+    - README.md
+    purpose: Project documentation
+  - name: clean
+    paths:
+    - .gitignore
+    purpose: Cleanup and git configuration
 docs:
   skills_dir: .agents/skills
   repo_map: README.md
@@ -260,9 +277,6 @@ rules:
       good:
       - .env.example
       - apps/web/.env.template
-  exceptions:
-  - path: frontend/.env
-    reason: Pre-existing violation recorded on web-hazards pack apply
   pack: web-hazards@1
 quality_gates:
 - Navigate through the entire interface using only the Tab and Shift+Tab keys.
