@@ -13,6 +13,50 @@ Failed debit → diagnose → predict best window → schedule within compliance
      to a tamper-evident audit ledger → surface it all on a ROI dashboard
 ```
 
+## Overview
+
+Recurring payment failures across UPI Autopay and e-NACH often burn through NPCI's strict 3-retry limit by retrying blindly every 24 hours. The Mandate Resurrection Agent analyzes the root cause of debit failures, predicts the optimal day when the customer will have liquidity based on historical debit patterns, schedules retries within banking compliance hours, and nudges the user via WhatsApp and SMS before executing retries via Razorpay.
+
+## Architecture
+
+The system consists of 5 decoupled layers connected through an audit ledger:
+
+```
+[ Ingestion / Webhook ]
+          │
+          ▼
+   [ Diagnosis Engine ] ──► Classifies decline code (insufficient funds, bank outage, expired)
+          │
+          ▼
+ [ Liquidity Predictor ] ──► Calculates optimal retry date via debit history histogram
+          │
+          ▼
+ [ Compliance Scheduler ] ──► Enforces 3-retry cap, blackout hours (18:00 to 21:00), bank health
+          │
+          ▼
+  [ Nudge & Execution ] ──► Dispatches Twilio alerts, executes via Razorpay UPI Autopay
+          │
+          ▼
+ [ Tamper-Evident Ledger ] ──► SHA-256 hash-chained log for every state transition
+```
+
+1. **Diagnosis Engine (`app/routers/diagnose.py`):** categorizes raw NPCI response codes into actionable failure classes.
+2. **Liquidity Predictor (`app/liquidity_predictor.py`):** evaluates customer and cohort debit histories to score optimal retry days.
+3. **Compliance Scheduler (`app/scheduler.py`):** enforces NPCI limits, pushes attempts outside peak hours, and pauses on customer date selections.
+4. **Execution & Nudge (`app/razorpay_client.py`, `app/nudge.py`):** triggers automated customer communications and charges stored mandate tokens.
+5. **Audit Chain (`app/audit.py`):** writes cryptographic hash chains verifying every diagnosis, decision, and payment event.
+
+## Tech Stack
+
+| Component | Technology | Rationale |
+|---|---|---|
+| Backend | Python 3.10+, FastAPI | High throughput async I/O, native OpenAPI documentation, and fast validation. |
+| Database | SQLite 3, SQLAlchemy, Alembic | Lightweight local setup with zero external daemon requirements and versioned migrations. |
+| Machine Learning | NumPy, Scipy | Cheap, explainable day-of-month frequency histogram models without black-box overfitting. |
+| Frontend | React 18, Vite 5, Tailwind CSS | Fast responsive single page application dashboard with real-time poll updates. |
+| Charts | Recharts | Declarative SVG financial trend charts and ROI telemetry visualizations. |
+| Testing | Pytest, Vitest | Comprehensive backend API testing and frontend component unit validation. |
+
 ## Prerequisites
 
 - Python 3.10 or higher
@@ -157,6 +201,20 @@ Full interactive docs at `/docs` once the backend is running.
 
 ---
 
+## Data Model
+
+The database schema (`backend/app/models.py`) includes 7 core models:
+
+- `Customer`: customer identity, phone number, and linked payment profile.
+- `Mandate`: UPI Autopay / e-NACH mandate metadata, bank identifier, and recurring token ID.
+- `FailedTransaction`: failed debit records, decline reason codes, and resolution states.
+- `DebitHistory`: past successful debit transactions used for frequency histogram liquidity prediction.
+- `RetryDecision`: compliance-evaluated retry attempts, target dates, and confidence scores.
+- `AuditLog`: tamper-evident SHA-256 hash-chained records linking previous hash, payload, and timestamp.
+- `BankStatus`: simulated bank outage states and downtime deferral windows.
+
+---
+
 ## Live Demo (Dynamic Data)
 
 Since the dashboard auto-refreshes every 8 seconds, you can easily demonstrate the system's real-time reactivity without needing external webhooks.
@@ -273,6 +331,14 @@ this and a real production deployment:
   not a live feed from NPCI or the bank - there isn't a public one to
   subscribe to. `POST /webhook/bank-status` exists so a downstream partner
   can push updates if they have one.
+
+## Deployment
+
+The application runs in 2 tiers:
+
+- **Frontend:** compiled into static assets with `npm run build` (`vite build`) and deployed to Vercel.
+- **Backend:** hosted as an ASGI web application using Uvicorn (`uvicorn app.main:app --host 0.0.0.0 --port 8000`).
+- **Production configuration:** configure database connection strings via `DATABASE_URL` and integrate live Razorpay keys via `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET`, and `RAZORPAY_WEBHOOK_SECRET`.
 
 ## License
 
