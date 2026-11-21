@@ -1,78 +1,67 @@
-# Mandate Resurrection Agent
+# Razorpay Buildathon
 
-**Track 03 — AI Revenue Recovery**
-
-An agent that diagnoses why a UPI Autopay / e-NACH recurring payment failed,
-predicts the day a retry is most likely to succeed, and spends NPCI's
-hard 3-retry-per-cycle budget on purpose instead of burning it on blind
-24-hour retries.
-
-```
-Failed debit → diagnose → predict best window → schedule within compliance
-     rules → nudge the customer → execute via Razorpay → log every step
-     to a tamper-evident audit ledger → surface it all on a ROI dashboard
-```
+AI revenue recovery agent for failed UPI Autopay payments, optimizing smart retry schedules within NPCI budget limits.
 
 ## Overview
 
-Recurring payment failures across UPI Autopay and e-NACH often burn through NPCI's strict 3-retry limit by retrying blindly every 24 hours. The Mandate Resurrection Agent analyzes the root cause of debit failures, predicts the optimal day when the customer will have liquidity based on historical debit patterns, schedules retries within banking compliance hours, and nudges the user via WhatsApp and SMS before executing retries via Razorpay.
+Recurring payment failures across UPI Autopay and e-NACH often burn through NPCI's strict 3-retry limit by retrying blindly every 24 hours. The Mandate Resurrection Agent analyzes debit failure reasons, predicts when the customer will have liquidity based on historical debit patterns, schedules retries outside banking peak hours, and nudges customers before executing retries via Razorpay.
 
 ## Architecture
 
-The system consists of 5 decoupled layers connected through an audit ledger:
+The system consists of 5 decoupled components connected through an audit ledger:
 
-```
-[ Ingestion / Webhook ]
-          │
-          ▼
-   [ Diagnosis Engine ] ──► Classifies decline code (insufficient funds, bank outage, expired)
-          │
-          ▼
- [ Liquidity Predictor ] ──► Calculates optimal retry date via debit history histogram
-          │
-          ▼
- [ Compliance Scheduler ] ──► Enforces 3-retry cap, blackout hours (18:00 to 21:00), bank health
-          │
-          ▼
-  [ Nudge & Execution ] ──► Dispatches Twilio alerts, executes via Razorpay UPI Autopay
-          │
-          ▼
- [ Tamper-Evident Ledger ] ──► SHA-256 hash-chained log for every state transition
+```text
+[ Webhook Ingestion ]
+         │
+         ▼
+[ Diagnosis Engine ] ──► Classifies decline code (insufficient funds, bank outage, expired)
+         │
+         ▼
+[ Liquidity Predictor ] ──► Computes optimal retry date via debit history histogram
+         │
+         ▼
+[ Compliance Scheduler ] ──► Enforces 3-retry limit, blackout hours (18:00 to 21:00), bank health
+         │
+         ▼
+[ Nudge & Execution ] ──► Sends WhatsApp and SMS alerts, executes charge via Razorpay
+         │
+         ▼
+[ Audit Ledger ] ──► SHA-256 hash-chained log for every state transition
 ```
 
-1. **Diagnosis Engine (`app/routers/diagnose.py`):** categorizes raw NPCI response codes into actionable failure classes.
-2. **Liquidity Predictor (`app/liquidity_predictor.py`):** evaluates customer and cohort debit histories to score optimal retry days.
-3. **Compliance Scheduler (`app/scheduler.py`):** enforces NPCI limits, pushes attempts outside peak hours, and pauses on customer date selections.
-4. **Execution & Nudge (`app/razorpay_client.py`, `app/nudge.py`):** triggers automated customer communications and charges stored mandate tokens.
-5. **Audit Chain (`app/audit.py`):** writes cryptographic hash chains verifying every diagnosis, decision, and payment event.
+1. **Diagnosis Engine (`app/routers/diagnose.py`):** categorizes raw NPCI response codes into failure classes.
+2. **Liquidity Predictor (`app/liquidity_predictor.py`):** evaluates past successful debits to score the best retry day.
+3. **Compliance Scheduler (`app/scheduler.py`):** enforces NPCI limits, avoids high-traffic banking hours, and pauses on customer choices.
+4. **Nudge and Execution (`app/nudge.py`, `app/razorpay_client.py`):** dispatches Twilio notifications and charges mandate tokens.
+5. **Audit Ledger (`app/audit.py`):** records cryptographic hash chains verifying every decision and payment event.
 
 ## Tech Stack
 
 | Component | Technology | Rationale |
 |---|---|---|
-| Backend | Python 3.10+, FastAPI | High throughput async I/O, native OpenAPI documentation, and fast validation. |
-| Database | SQLite 3, SQLAlchemy, Alembic | Lightweight local setup with zero external daemon requirements and versioned migrations. |
-| Machine Learning | NumPy, Scipy | Cheap, explainable day-of-month frequency histogram models without black-box overfitting. |
-| Frontend | React 18, Vite 5, Tailwind CSS | Fast responsive single page application dashboard with real-time poll updates. |
-| Charts | Recharts | Declarative SVG financial trend charts and ROI telemetry visualizations. |
-| Testing | Pytest, Vitest | Comprehensive backend API testing and frontend component unit validation. |
+| Backend | Python, FastAPI | High throughput async I/O, fast data validation, and native OpenAPI documentation. |
+| Database | SQLite, SQLAlchemy, Alembic | Lightweight local setup with zero external daemons and versioned migrations. |
+| Machine Learning | NumPy, SciPy | Explainable day-of-month frequency histogram models without black-box overfitting. |
+| Frontend | React 18, Vite, Tailwind CSS | Fast responsive single-page application dashboard with real-time status polling. |
+| Charts | Recharts | Declarative SVG financial trend charts and recovery telemetry. |
+| Testing | Pytest, Vitest | Backend API integration testing and frontend component unit validation. |
 
-## Prerequisites
+## Setup
+
+### Prerequisites
 
 - Python 3.10 or higher
 - Node.js 18 or higher and npm
 - SQLite 3
 
-## Installation
-
 ### Backend Setup
 
 ```bash
 cd backend
-python3 -m venv venv && source venv/bin/activate   # optional but recommended
-pip install -r requirements.txt --break-system-packages   # drop the flag in a venv
-alembic upgrade head                                       # create the database schema
-ENABLE_AUTO_SEED=true python -m scripts.seed_demo           # 25 customers, 55 failed transactions
+python -m venv venv && source venv/bin/activate
+pip install -r requirements.txt
+alembic upgrade head
+ENABLE_AUTO_SEED=true python -m scripts.seed_demo
 ```
 
 ### Frontend Setup
@@ -82,264 +71,122 @@ cd frontend
 npm install
 ```
 
-### Configuration (.env)
+### Environment Variables
 
-The project includes a `backend/.env.example` file that outlines the optional API keys (Razorpay, Twilio, Auth0). You do **not** need to provide these for local testing or hackathon submissions — the system automatically falls back to simulation mode (synthetic data and mock tokens) if they are missing. 
+Environment variables are configured in `.env` files in each subfolder. The system falls back to simulation mode if third-party credentials are omitted.
 
-If you plan to use real test-mode APIs, copy the example file:
+In `backend/.env`:
+
+- `DATABASE_URL`
+- `RAZORPAY_KEY_ID`
+- `RAZORPAY_KEY_SECRET`
+- `RAZORPAY_WEBHOOK_SECRET`
+- `TWILIO_ACCOUNT_SID`
+- `TWILIO_AUTH_TOKEN`
+- `TWILIO_FROM_NUMBER`
+- `TEMPLATE_SID_INSUFFICIENT_FUNDS`
+- `TEMPLATE_SID_BANK_OUTAGE`
+- `TEMPLATE_SID_MANDATE_EXPIRED`
+- `TEMPLATE_SID_MANDATE_CANCELLED`
+- `ALLOWED_ORIGINS`
+- `JWT_SECRET`
+- `OIDC_ISSUER`
+- `OIDC_AUDIENCE`
+- `ENABLE_AUTO_SEED`
+
+In `frontend/.env`:
+
+- `VITE_API_BASE_URL`
+- `VITE_RAZORPAY_KEY_ID`
+
+Never commit secrets or `.env` files to git.
+
+## How to Run and Test
+
+### Running the Services
+
+Start the backend API server:
+
 ```bash
-cp backend/.env.example backend/.env
-```
-And populate it with your `RAZORPAY_KEY_ID`, `TWILIO_ACCOUNT_SID`, etc. No code changes are needed — `app/razorpay_client.py` and `app/nudge.py` check for these and fall back to simulation automatically.
-
-## Usage and Quick Start
-
-### Starting the Backend
-
-From the `backend` directory:
-```bash
+cd backend
 uvicorn app.main:app --reload --port 8000
 ```
 
-The database is a local SQLite file (`mandate_resurrection.db`, created
-next to `app/`). It does **not** auto-seed on startup - run the seed
-command above once after creating the schema. To start over, delete the
-file, re-run `alembic upgrade head`, then re-seed.
-API docs: `http://localhost:8000/docs`.
+Start the frontend dashboard:
 
-Every endpoint except the webhooks requires a merchant bearer token. For
-local testing, use the demo token:
-
-```
-Authorization: Bearer secret-vela
-```
-
-(`app/auth.py` maps a handful of hardcoded demo tokens to merchant names -
-see that file for the full list. A real deployment replaces this with a
-proper identity provider - see "Adding real Razorpay UPI" below.)
-
-### Starting the Frontend
-
-From the `frontend` directory:
 ```bash
+cd frontend
 npm run dev
 ```
 
-Open `http://localhost:5173`. It talks to the backend at
-`http://localhost:8000` by default — override with `VITE_API_BASE_URL` in
-`frontend/.env` if you run the API elsewhere.
+Open `http://localhost:5173` in your browser. API documentation is available at `http://localhost:8000/docs`.
 
----
+### Running Tests
 
-## The liquidity-window model — what it is and why
+Run backend tests:
 
-**Approach: a day-of-month frequency histogram, not a trained classifier.**
+```bash
+cd backend
+python -m pytest
+```
 
-For each customer, the model looks at their `DebitHistory` (past
-*successful* debits), counts which day of the month those debits landed
-on, and recommends the next occurrence of the most common day. The
-confidence score is simply `(count of that day) / (total debits on file)`.
+Run frontend tests:
 
-If a customer has fewer than 3 historical debits (a new subscriber, or one
-who's mostly paid on time), there isn't enough personal signal to trust —
-the model falls back to a **cohort-level histogram** built across every
-customer's debit history, with the confidence score capped at 0.5 to
-reflect that it's a population-level guess, not a personal one.
+```bash
+cd frontend
+npm run test
+```
 
-**Why this fits the problem better than a trained model would, here:**
+## API Endpoints
 
-1. **Data volume.** A monthly subscription produces at most ~12 successful
-   debits a year per customer. That's far too little to fit a supervised
-   model per customer without serious overfitting.
-2. **Explainability matters more than a few points of accuracy.** The
-   output feeds a decision that's constrained by a hard compliance cap —
-   "we picked the 7th because you were paid successfully on the 6th, 7th,
-   and 8th three months running" is auditable and defensible. A gradient-
-   boosted black box making the same call, on the same data volume, isn't
-   more accurate and is much harder to justify to a compliance reviewer.
-3. **Day-of-month is a strong, cheap signal.** Salaries, EMI clearances,
-   and most recurring inflows in India are strongly periodic by calendar
-   day, so this captures most of the realistically available signal for
-   very little modeling cost.
-
-The function signature (`predict_liquidity_window(db, customer_id)` in
-`app/liquidity_predictor.py`) is deliberately the seam for a future
-upgrade — a trained model could replace the histogram behind the same
-interface without touching any caller.
-
----
-
-## Compliance rules implemented, mapped to NPCI's requirements
-
-| NPCI requirement | Where it's enforced | How |
+| Endpoint | Method | Purpose |
 |---|---|---|
-| Max 3 debit attempts per mandate per billing cycle | `POST /schedule-retry` in `app/routers/schedule.py`, gated by `app/scheduler.py::MAX_RETRIES` | A 4th scheduling request returns **HTTP 400** and the transaction is marked `EXHAUSTED`. Verified live: see demo script below. |
-| No retries during high-traffic banking hours | `app/scheduler.py::_push_out_of_peak_hours` | Any candidate slot between 18:00–21:00 is pushed to 21:00 the same day — the predicted *date* is kept, only the *hour* moves. |
-| Don't retry a dead mandate | `app/scheduler.py::decide_retry` | `MANDATE_EXPIRED` / `MANDATE_CANCELLED` never consume a retry slot at all — they're routed to the re-mandate flow instead, and the transaction is marked `CANCELLED` without touching `retry_count`. |
-| Don't retry blindly into a known bank outage | `app/scheduler.py::decide_retry`, backed by the mock `BankStatus` table | `BANK_OUTAGE` failures check the bank's status flag; if still `DOWN`, the retry is deferred by a recheck interval instead of firing immediately. |
-| Customer consent / self-scheduling should override automation | `POST /customer-choose-date` in `app/routers/customer.py`, checked at the top of `schedule-retry` | Once a customer picks a date, the transaction moves to `AWAITING_CUSTOMER` and further `schedule-retry` calls are no-ops until that date passes. |
-| Every decision must be auditable | `app/audit.py` | Every diagnosis, scheduling decision, nudge, and execution writes a `AuditLog` row whose hash covers `prev_hash + step + payload + timestamp` — a SHA-256 hash chain per transaction. `GET /audit/{id}` recomputes and verifies the whole chain. |
-
----
-
-## API reference
-
-| Endpoint | Purpose |
-|---|---|
-| `POST /diagnose` | Maps a transaction's raw NPCI decline code to a category |
-| `GET /predict-retry-window/{customer_id}` | Returns the predicted best retry date + confidence |
-| `POST /schedule-retry` | Runs the compliance-gated scheduling decision, sends the customer nudge |
-| `POST /customer-choose-date` | Customer self-schedule; pauses automated retries |
-| `POST /execute-retry` | Executes the most recently scheduled attempt via Razorpay (or simulator) |
-| `GET /audit/{transaction_id}` | Full hash-chained audit trail + tamper-check result |
-| `GET /dashboard/summary` | ROI numbers for the merchant dashboard |
-| `GET /dashboard/live-feed` | Recent retry decisions, newest first |
-| `GET /transactions` | List/filter failed transactions |
-| `GET /transactions/{id}` | Full drill-down: mandate, decisions, nudges |
-
-Full interactive docs at `/docs` once the backend is running.
-
----
+| `/diagnose` | POST | Classifies a raw NPCI decline code into a recovery category |
+| `/predict-retry-window/{customer_id}` | GET | Returns the predicted optimal retry date and confidence score |
+| `/schedule-retry` | POST | Applies compliance rules and schedules the next debit attempt |
+| `/customer-choose-date` | POST | Saves a customer self-scheduled date and pauses automated retries |
+| `/execute-retry` | POST | Executes the scheduled retry charge via Razorpay or the simulator |
+| `/audit/{transaction_id}` | GET | Returns the full SHA-256 hash-chained audit trail and integrity check |
+| `/dashboard/summary` | GET | Returns aggregated recovery statistics and ROI metrics |
+| `/dashboard/live-feed` | GET | Returns recent retry decisions in reverse chronological order |
+| `/transactions` | GET | Lists failed transactions with status and customer filters |
+| `/transactions/{id}` | GET | Returns detailed drill-down data for a single transaction |
 
 ## Data Model
 
 The database schema (`backend/app/models.py`) includes 7 core models:
 
-- `Customer`: customer identity, phone number, and linked payment profile.
-- `Mandate`: UPI Autopay / e-NACH mandate metadata, bank identifier, and recurring token ID.
-- `FailedTransaction`: failed debit records, decline reason codes, and resolution states.
-- `DebitHistory`: past successful debit transactions used for frequency histogram liquidity prediction.
+- `Customer`: customer identity, contact information, and linked payment profile.
+- `Mandate`: UPI Autopay and e-NACH mandate metadata, bank identifier, and recurring token ID.
+- `FailedTransaction`: debit failure records, decline reason codes, and resolution states.
+- `DebitHistory`: past successful debits used for liquidity histogram prediction.
 - `RetryDecision`: compliance-evaluated retry attempts, target dates, and confidence scores.
-- `AuditLog`: tamper-evident SHA-256 hash-chained records linking previous hash, payload, and timestamp.
+- `AuditLog`: tamper-evident SHA-256 hash chain linking previous hash, payload, and timestamp.
 - `BankStatus`: simulated bank outage states and downtime deferral windows.
 
----
+## Key Decisions and Tradeoffs
 
-## Live Demo (Dynamic Data)
+1. **Histogram frequency modeling over deep learning:** a monthly subscription generates at most 12 debits per year per customer. This sample size is too small for supervised deep learning without overfitting. Day-of-month frequency histograms provide transparent and defensible recommendations.
+2. **Strict compliance enforcement:** NPCI caps retries at 3 attempts per cycle. The scheduler rejects any 4th attempt with HTTP 400 and marks the transaction as exhausted. Debits are automatically deferred out of high-traffic hours (18:00 to 21:00).
+3. **Customer self-scheduling override:** customer selected dates take precedence over automated algorithm recommendations.
+4. **Cryptographic audit logging:** every state change writes a SHA-256 hash covering `prev_hash + step + payload + timestamp` to ensure non-repudiation.
 
-Since the dashboard auto-refreshes every 8 seconds, you can easily demonstrate the system's real-time reactivity without needing external webhooks.
+## Known Limits
 
-1. Start both the backend and frontend servers as described in the Quick Start.
-2. Open the Merchant Dashboard at `http://localhost:5173`.
-3. In a new terminal, activate the backend environment and run the webhook simulation script:
-   ```bash
-   cd backend
-   source venv/bin/activate
-   python -m scripts.simulate_webhook
-   ```
-4. This script injects a randomized failed transaction directly into the database.
-5. **Watch the dashboard** — within 8 seconds (no page refresh required!), the new transaction will magically appear in the "Failed Transactions" table with a `Pending diagnosis` status.
-6. Click the transaction, hit **Diagnose & Schedule**, and watch the ML engine process it and push it into the "Live decision feed".
-7. (Optional) To demonstrate the frictionless Customer Self-Scheduling UI, generate a unique link for the newly failed transaction by running:
-   ```bash
-   python -m scripts.get_demo_link
-   ```
-   Click the generated URL to open the customer-facing scheduling flow!
-8. Click **Execute via Razorpay** to simulate the debit attempt landing on that date.
-9. Scroll the audit ledger for that transaction to see the SHA-256 hash-chained logs.
-
-## Adding real Razorpay UPI
-
-The current code only ever executes the *retry* step for a mandate that
-already exists - it has no flow for actually creating one. Real UPI
-Autopay has three distinct phases, and only the third is built:
-
-1. **Mandate registration** (not built) - the customer authorises a UPI
-   Autopay mandate through Razorpay Checkout. This needs its own endpoint
-   and a small customer-facing page:
-   - `POST /customers` to get a `customer_id` for the payer.
-   - `POST /orders` for ₹1 (UPI mandate authorisation orders are ₹1,
-     not the real recurring amount) with the recurring/token parameters
-     Razorpay's Standard Checkout expects for UPI Autopay.
-   - Load Razorpay's Checkout.js with that order and let the customer
-     approve the mandate in their UPI app (Google Pay/PhonePe/etc.) -
-     this step cannot be done server-side, it needs a browser.
-   - On success, Razorpay returns a `token` tied to that customer. Save
-     it into `Mandate.razorpay_customer_id` / `razorpay_token_id` (the
-     columns already exist - `seed_demo.py` currently fills them with
-     fake values as a stand-in for this step).
-2. **Tokenisation** - handled by Razorpay once step 1 succeeds; nothing
-   to build here beyond storing the token as above.
-3. **Charging retries** (built, `app/razorpay_client.py`) - creates a new
-   order and a recurring payment referencing the stored token. This is
-   the part `execute_retry_job` already calls.
-
-**Before wiring in real keys**, confirm the exact request shape against
-Razorpay's own API reference rather than trusting this codebase's
-guesses - endpoint paths and required fields for recurring charges do
-shift, and getting them wrong with live test-mode keys is a more
-confusing failure mode than a 404. Start at
-`https://razorpay.com/docs/payments/recurring-payments/` and the
-UPI-specific page under it.
-
-**Webhook setup** (`app/routers/webhook.py` is already built for this):
-1. In the Razorpay Dashboard (test mode), go to Settings → Webhooks and
-   add an endpoint for `payment.captured` and `payment.failed`.
-2. Since your local machine has no public URL, use `ngrok http 8000` and
-   register the ngrok URL + `/webhook/razorpay` as the webhook.
-3. Copy the webhook secret Razorpay generates into
-   `RAZORPAY_WEBHOOK_SECRET` - this is what `verify_signature()` checks.
-
-## Testing it
-
-1. **Without real credentials** (default): `execute-retry` resolves
-   immediately using the simulator - this is what the existing
-   `tests/test_endpoints.py` suite exercises, and what the demo script
-   above walks through by hand.
-2. **With real test-mode credentials**, once mandate registration (above)
-   is built and a mandate has a real token: set `RAZORPAY_KEY_ID` /
-   `RAZORPAY_KEY_SECRET` / `RAZORPAY_WEBHOOK_SECRET`, run `ngrok`, and:
-   - Call `/schedule-retry` then `/execute-retry` as normal - the
-     transaction should move to `PENDING_CONFIRMATION` (a real API call
-     was placed, not a simulated one).
-   - Razorpay's test mode lets you simulate a UPI approval/decline from
-     its dashboard, which should fire your webhook and resolve the
-     transaction to `RECOVERED` or back to `PENDING`/`EXHAUSTED` - verify
-     this by watching `GET /transactions/{id}` before and after.
-   - If you want to trigger the webhook manually instead of waiting on
-     Razorpay's test simulator, `backend/mock_webhook.py` sends the same
-     payload shape by hand - useful for testing the webhook handler in
-     isolation before real credentials are ready.
-3. Either way, run `pytest tests/ -v` after any change to the scheduler,
-   the webhook handler, or the routers - `test_endpoints.py` hits the
-   real HTTP layer and would have caught several of the bugs fixed in
-   this audit; `test_scheduler.py` covers the compliance-rule matrix in
-   isolation. Add a case to whichever file matches the layer you changed.
-
-## What's still stubbed
-
-Most of the original hackathon-cut list has since been built out (see
-`AUDIT_v2.md` for the full before/after). What's left standing between
-this and a real production deployment:
-
-- **Razorpay tokens are synthetic.** `scripts/seed_demo.py` generates fake
-  `razorpay_customer_id`/`razorpay_token_id` values. A real deployment
-  needs an actual mandate-onboarding flow that captures these from
-  Razorpay when the customer first authorizes their UPI Autopay mandate -
-  see "Adding real Razorpay UPI" below.
-- **WhatsApp template SIDs are placeholders** (`app/nudge.py`). Real
-  Content SIDs require drafting the templates and getting them approved
-  by Meta through the Twilio console first.
-- **Auth is a hardcoded token map** (`app/auth.py`). Fine for a demo with
-  one team's merchants; a real deployment needs a proper identity
-  provider issuing per-merchant JWTs.
-- **The ML model trains on synthetic data at startup** (`train_mock_model`
-  in `app/liquidity_predictor.py`). Real balance signals require an
-  Account Aggregator integration (Setu/Finvu) with customer consent - a
-  compliance and UX project in its own right, not just a data swap.
-- **Bank outage detection is inferred from your own decline-rate spikes**,
-  not a live feed from NPCI or the bank - there isn't a public one to
-  subscribe to. `POST /webhook/bank-status` exists so a downstream partner
-  can push updates if they have one.
+- **Synthetic tokens in simulation:** real UPI Autopay mandates require browser-based authorization through Razorpay Checkout.js. The simulator uses synthetic tokens for testing retry execution.
+- **WhatsApp templates:** real Twilio production deployment requires Meta template approval for Content SIDs.
+- **Authentication:** local development uses demo merchant bearer tokens. Production requires an identity provider issuing signed JWTs.
+- **Liquidity signals:** the system infers liquidity from historical debits rather than real-time Account Aggregator bank balance feeds.
 
 ## Deployment
 
 The application runs in 2 tiers:
 
-- **Frontend:** compiled into static assets with `npm run build` (`vite build`) and deployed to Vercel.
-- **Backend:** hosted as an ASGI web application using Uvicorn (`uvicorn app.main:app --host 0.0.0.0 --port 8000`).
-- **Production configuration:** configure database connection strings via `DATABASE_URL` and integrate live Razorpay keys via `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET`, and `RAZORPAY_WEBHOOK_SECRET`.
+- **Frontend:** compiled into static assets with `npm run build` in `frontend` and hosted on Vercel.
+- **Backend:** hosted as an ASGI web application with Uvicorn.
+- **Configuration:** database URLs and API keys are managed through server environment variables.
 
-## License
+## Author and License
 
-MIT License. Copyright (c) 2025 Vishal Muralidharan.
+Created by Vishal Muralidharan.
+Distributed under the MIT License.
