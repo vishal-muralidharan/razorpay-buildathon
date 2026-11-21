@@ -30,3 +30,27 @@ jobs:
     - name: Run Pytest
       run: |
         pytest tests/
+
+  lint-frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./frontend
+
+    steps:
+    - uses: actions/checkout@v7
+
+    - name: Set up Node
+      uses: actions/setup-node@v7
+      with:
+        node-version: lts/*
+        cache: npm
+        cache-dependency-path: frontend/package-lock.json
+
+    - name: Install
+      run: npm ci
+
+    - name: Lint
+      env:
+        CI: "true"
+      run: npm run lint
