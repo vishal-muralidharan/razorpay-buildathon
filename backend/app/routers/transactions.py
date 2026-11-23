@@ -42,7 +42,7 @@ def list_transactions(
 
 @router.get("/transactions/{transaction_id}")
 def get_transaction_detail(transaction_id: int, merchant_name: str = Depends(verify_merchant), db: Session = Depends(get_db)):
-    t = db.query(models.FailedTransaction).get(transaction_id)
+    t = db.get(models.FailedTransaction, transaction_id)
     if not t:
         raise HTTPException(status_code=404, detail="Transaction not found")
     if t.mandate.merchant_name != merchant_name:

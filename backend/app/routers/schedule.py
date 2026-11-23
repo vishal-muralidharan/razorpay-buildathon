@@ -18,7 +18,7 @@ router = APIRouter(tags=["scheduling"])
 
 @router.post("/schedule-retry", response_model=schemas.ScheduleRetryResponse)
 def schedule_retry(req: schemas.ScheduleRetryRequest, merchant_name: str = Depends(verify_merchant), db: Session = Depends(get_db)):
-    txn = db.query(models.FailedTransaction).get(req.transaction_id)
+    txn = db.get(models.FailedTransaction, req.transaction_id)
     if not txn:
         raise HTTPException(status_code=404, detail="Transaction not found")
     if txn.mandate.merchant_name != merchant_name:
@@ -104,7 +104,7 @@ def schedule_retry(req: schemas.ScheduleRetryRequest, merchant_name: str = Depen
     audit.log_step(db, txn.id, "RETRY_SCHEDULED", audit_payload)
 
     # Fire the customer nudge for this decision.
-    customer = db.query(models.Customer).get(txn.customer_id)
+    customer = db.get(models.Customer, txn.customer_id)
     mandate = txn.mandate
     from app.nudge import build_template_variables, build_message_preview, build_self_schedule_options, send_nudge
 
@@ -163,7 +163,7 @@ def execute_retry(req: schemas.ExecuteRetryRequest, merchant_name: str = Depends
     test-mode (or the simulator). In production this would be invoked by
     APScheduler when a decision's chosen_slot_time arrives; exposed here as
     a direct endpoint so the demo can trigger it on cue."""
-    txn = db.query(models.FailedTransaction).get(req.transaction_id)
+    txn = db.get(models.FailedTransaction, req.transaction_id)
     if not txn:
         raise HTTPException(status_code=404, detail="Transaction not found")
     if txn.mandate.merchant_name != merchant_name:
