@@ -12,7 +12,7 @@ router = APIRouter(tags=["diagnosis"])
 
 @router.post("/diagnose", response_model=schemas.DiagnoseResponse)
 def diagnose(req: schemas.DiagnoseRequest, merchant_name: str = Depends(verify_merchant), db: Session = Depends(get_db)):
-    txn = db.query(models.FailedTransaction).get(req.transaction_id)
+    txn = db.get(models.FailedTransaction, req.transaction_id)
     if not txn:
         raise HTTPException(status_code=404, detail="Transaction not found")
     if txn.mandate.merchant_name != merchant_name:

@@ -21,7 +21,7 @@ def execute_retry_job(decision_id: int):
     db: Session = SessionLocal()
     try:
         # 1. Fetch decision with FOR UPDATE lock to prevent double-execution
-        decision = db.query(models.RetryDecision).with_for_update().get(decision_id)
+        decision = db.get(models.RetryDecision, decision_id, with_for_update=True)
         if not decision or decision.outcome != "PENDING":
             return  # Already executed or doesn't exist
 

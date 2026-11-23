@@ -11,7 +11,7 @@ router = APIRouter(tags=["audit"])
 
 @router.get("/audit/{transaction_id}", response_model=schemas.AuditTrailResponse)
 def get_audit_trail(transaction_id: int, merchant_name: str = Depends(verify_merchant), db: Session = Depends(get_db)):
-    txn = db.query(models.FailedTransaction).get(transaction_id)
+    txn = db.get(models.FailedTransaction, transaction_id)
     if not txn:
         raise HTTPException(status_code=404, detail="Transaction not found")
     if txn.mandate.merchant_name != merchant_name:

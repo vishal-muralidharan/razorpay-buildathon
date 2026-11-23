@@ -11,7 +11,7 @@ router = APIRouter(tags=["prediction"])
 
 @router.get("/predict-retry-window/{customer_id}", response_model=schemas.PredictRetryWindowResponse)
 def predict_retry_window(customer_id: int, merchant_name: str = Depends(verify_merchant), db: Session = Depends(get_db)):
-    customer = db.query(models.Customer).get(customer_id)
+    customer = db.get(models.Customer, customer_id)
     if not customer:
         raise HTTPException(status_code=404, detail="Customer not found")
 

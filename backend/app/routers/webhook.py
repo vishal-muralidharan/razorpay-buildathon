@@ -53,7 +53,7 @@ async def razorpay_webhook(request: Request, db: Session = Depends(get_db)):
     if not txn:
         return {"status": "not_found"}
         
-    decision = db.query(models.RetryDecision).get(decision_id)
+    decision = db.get(models.RetryDecision, decision_id)
     if not decision:
         return {"status": "not_found"}
         

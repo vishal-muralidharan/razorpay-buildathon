@@ -15,7 +15,7 @@ def customer_choose_date(req: schemas.CustomerChooseDateRequest, db: Session = D
     if token_txn_id != req.transaction_id:
         raise HTTPException(status_code=403, detail="Token does not match the requested transaction")
 
-    txn = db.query(models.FailedTransaction).get(req.transaction_id)
+    txn = db.get(models.FailedTransaction, req.transaction_id)
     if not txn:
         raise HTTPException(status_code=404, detail="Transaction not found")
 
