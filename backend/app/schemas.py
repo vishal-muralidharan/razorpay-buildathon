@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing import Optional, List
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 
 class DiagnoseRequest(BaseModel):
@@ -68,8 +68,7 @@ class AuditLogEntry(BaseModel):
     hash: str
     timestamp: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class AuditTrailResponse(BaseModel):
@@ -88,8 +87,7 @@ class TransactionSummary(BaseModel):
     retry_count: int
     failed_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class DashboardSummary(BaseModel):
