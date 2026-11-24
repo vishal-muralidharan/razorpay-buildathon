@@ -50,7 +50,7 @@ The system consists of 5 decoupled components connected through an audit ledger:
 
 ### Prerequisites
 
-- Python 3.10 or higher
+- Python 3.11 or higher
 - Node.js 18 or higher and npm
 - SQLite 3
 
