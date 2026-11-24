@@ -46,7 +46,7 @@ The system consists of 5 decoupled components connected through an audit ledger:
 | Charts | Recharts | Declarative SVG financial trend charts and recovery telemetry. |
 | Testing | Pytest, Vitest | Backend API integration testing and frontend component unit validation. |
 
-## Setup
+## Setup and Installation
 
 ### Prerequisites
 
@@ -68,7 +68,7 @@ ENABLE_AUTO_SEED=true python -m scripts.seed_demo
 
 ```bash
 cd frontend
-npm install
+npm ci
 ```
 
 ### Environment Variables
@@ -101,7 +101,7 @@ In `frontend/.env`:
 
 Never commit secrets or `.env` files to git.
 
-## How to Run and Test
+## Quick Start: How to Run and Test
 
 ### Running the Services
 
