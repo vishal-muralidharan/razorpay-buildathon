@@ -1,3 +1,4 @@
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -7,11 +8,24 @@ from app.routers import diagnose, predict, schedule, customer, audit_router, das
 
 Base.metadata.create_all(bind=engine)
 
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    from app.scheduler_setup import start_scheduler, scheduler
+    from app.liquidity_predictor import train_mock_model
+
+    start_scheduler()
+    train_mock_model()
+    yield
+    scheduler.shutdown()
+
+
 app = FastAPI(
     title="Mandate Resurrection Agent",
     description="Diagnoses failed UPI Autopay/e-NACH mandates, predicts the best retry "
                 "window, and recovers revenue within NPCI's 3-retry compliance cap.",
     version="1.0.0",
+    lifespan=lifespan,
 )
 
 import os
@@ -47,21 +61,4 @@ def root():
     }
 
 
-@app.on_event("startup")
-def startup_event():
-    """Convenience for the demo: seed synthetic data automatically on first
-    boot if the database is empty, so `uvicorn app.main:app` alone is
-    enough to get a working demo. Safe to remove for a real deployment."""
-    from app.scheduler_setup import start_scheduler
-    from app.liquidity_predictor import train_mock_model
-    
-    start_scheduler()
-    train_mock_model()
 
-    # Removed auto-seeding. Run scripts/seed_demo.py manually with ENABLE_AUTO_SEED=true
-    pass
-
-@app.on_event("shutdown")
-def shutdown_event():
-    from app.scheduler_setup import scheduler
-    scheduler.shutdown()
