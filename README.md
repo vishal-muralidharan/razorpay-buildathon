@@ -75,6 +75,16 @@ npm ci
 
 Environment variables are configured in `.env` files in each subfolder. The system falls back to simulation mode if third-party credentials are omitted.
 
+#### Authentication and Security
+
+- `JWT_SECRET`: Secret used to sign short-lived customer scheduling link tokens. Required in production. It must be 32 bytes or more. Make one with:
+  ```bash
+  python3 -c "import secrets; print(secrets.token_urlsafe(48))"
+  ```
+  If `JWT_SECRET` is missing or shorter than 32 bytes, the backend logs a warning and generates a random secret per process. Tokens stop working at every restart and across instances.
+- `OIDC_ISSUER`: OIDC identity provider URL for the merchant dashboard. Without it, demo merchant tokens are accepted.
+- `OIDC_AUDIENCE`: Expected audience claim for the OIDC provider.
+
 In `backend/.env`:
 
 - `DATABASE_URL`
