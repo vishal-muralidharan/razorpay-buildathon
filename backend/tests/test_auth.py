@@ -39,3 +39,16 @@ def test_short_secret_gives_random(caplog):
             secret3 = auth._init_jwt_secret()
             assert secret3 == valid_secret
             assert "JWT_SECRET is not set" not in caplog.text
+
+
+def test_oidc_issuer_warning_when_unset(caplog):
+    """Verify that a warning is logged when OIDC_ISSUER is unset."""
+    import importlib
+    with pytest.MonkeyPatch.context() as mp:
+        mp.delenv("OIDC_ISSUER", raising=False)
+        caplog.clear()
+        with caplog.at_level("WARNING"):
+            importlib.reload(auth)
+            assert "OIDC_ISSUER is not set: demo merchant tokens are accepted." in caplog.text
+    # Reset auth module back with test JWT secret
+    importlib.reload(auth)

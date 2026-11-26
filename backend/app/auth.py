@@ -28,6 +28,8 @@ jwks_client = None
 if OIDC_ISSUER:
     jwks_url = f"{OIDC_ISSUER.rstrip('/')}/.well-known/jwks.json"
     jwks_client = PyJWKClient(jwks_url)
+else:
+    logger.warning("OIDC_ISSUER is not set: demo merchant tokens are accepted.")
 
 def verify_merchant(token: str = Depends(oauth2_scheme)) -> str:
     # If a real Identity Provider is configured, validate the JWT securely.
