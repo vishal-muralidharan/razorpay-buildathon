@@ -1,5 +1,14 @@
+import logging
+import os
+import secrets
+from datetime import datetime, timedelta, timezone
+
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
+import jwt
+from jwt import PyJWKClient
+
+logger = logging.getLogger(__name__)
 
 # In a real system, this would map tokens to a Merchant database table.
 # For this demo, we use a simple hardcoded dictionary to simulate Authz.
@@ -12,11 +21,6 @@ MOCK_MERCHANT_TOKENS = {
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
-import os
-import jwt
-from jwt import PyJWKClient
-from datetime import datetime, timedelta, timezone
-
 OIDC_ISSUER = os.getenv("OIDC_ISSUER")  # e.g., "https://my-tenant.auth0.com/"
 OIDC_AUDIENCE = os.getenv("OIDC_AUDIENCE")  # e.g., "https://api.vela.com"
 
@@ -24,6 +28,8 @@ jwks_client = None
 if OIDC_ISSUER:
     jwks_url = f"{OIDC_ISSUER.rstrip('/')}/.well-known/jwks.json"
     jwks_client = PyJWKClient(jwks_url)
+else:
+    logger.warning("OIDC_ISSUER is not set: demo merchant tokens are accepted.")
 
 def verify_merchant(token: str = Depends(oauth2_scheme)) -> str:
     # If a real Identity Provider is configured, validate the JWT securely.
@@ -63,7 +69,18 @@ def verify_merchant(token: str = Depends(oauth2_scheme)) -> str:
         )
     return merchant_name
 
-JWT_SECRET = os.getenv("JWT_SECRET", "super-secret-demo-key-123")
+def _init_jwt_secret() -> str:
+    secret = os.getenv("JWT_SECRET")
+    if not secret or len(secret.encode("utf-8")) < 32:
+        logger.warning(
+            "JWT_SECRET is not set or is too short: using a random secret. "
+            "Tokens stop working when the process restarts."
+        )
+        return secrets.token_urlsafe(48)
+    return secret
+
+
+JWT_SECRET = _init_jwt_secret()
 ALGORITHM = "HS256"
 
 def generate_customer_token(transaction_id: int) -> str:
